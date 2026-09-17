@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
-import "@chartkit/internal/styles.css";
+import { Geist, Geist_Mono } from "next/font/google";
+import { SITE_URL } from "./lib/site";
+import "generative-charts/styles.css";
 import "./globals.css";
 
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://chartkit.dev"),
-  title: { default: "ChartKit — Charts with a point of view", template: "%s · ChartKit" },
+  metadataBase: new URL(SITE_URL),
+  title: { default: "Generative Charts — Charts with a point of view", template: "%s · Generative Charts" },
   description: "Polished, accessible React charts with eighteen chart families, three themes, and universal light and dark modes.",
-  openGraph: { title: "ChartKit", description: "Charts with a point of view.", type: "website", images: ["/og.png"] },
-  twitter: { card: "summary_large_image", title: "ChartKit", description: "Charts with a point of view.", images: ["/og.png"] },
+  openGraph: { title: "Generative Charts", description: "Charts with a point of view.", type: "website", images: ["/opengraph-image"] },
+  twitter: { card: "summary_large_image", title: "Generative Charts", description: "Charts with a point of view.", images: ["/opengraph-image"] },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" data-site-theme="light" data-scroll-behavior="smooth" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('chartkit-site-theme')||'light';document.documentElement.dataset.siteTheme=t;document.documentElement.style.colorScheme=t}catch(e){}})()` }} /></head><body>{children}</body></html>;
+  return <html lang="en" data-site-theme="light" data-scroll-behavior="smooth" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('chartkit-site-theme')||'light';document.documentElement.dataset.siteTheme=t;document.documentElement.style.colorScheme=t}catch(e){}})()` }} /></head><body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body></html>;
 }

@@ -4,8 +4,10 @@ import { useId, useMemo, useState, type CSSProperties, type FocusEvent, type Key
 import { scaleBand, scaleLinear, scalePoint } from "d3-scale";
 import { area, arc, curveLinear, curveMonotoneX, line, pie } from "d3-shape";
 import { ticks } from "d3-array";
+import { ChartTooltip } from "./tooltip.js";
+import { ResponsiveChart, useChartWidth } from "./responsive.js";
 import { resolveTheme, themeStyle } from "./themes.js";
-import { defaultFormat, extent, hasUsableData, MARGIN, numberValue, visibleSeries, WIDTH } from "./utils.js";
+import { defaultFormat, extent, hasUsableData, MARGIN, numberValue, visibleSeries } from "./utils.js";
 import type {
   AreaChartProps, BarChartProps, ChartAppearance, ChartDatum, CohortChartProps, CommonChartProps, HeatmapChartProps,
   LineChartProps, PieChartProps, RadarChartProps, ResolvedChartTheme, ScatterChartProps, Series, TerrainChartProps,
@@ -23,7 +25,7 @@ function useSeriesState<T extends ChartDatum>(series: Series<T>[]) {
 }
 
 function ChartFrame<T extends ChartDatum>({
-  figureLabel, title, description, source, theme, appearance = "light", height = 380, className = "", style, animate = true,
+  figureLabel, title, description, source, theme, appearance = "light", className = "", style, animate = true,
   showLegend = true, legend = [], hidden = new Set(), onLegendToggle, tooltip, children, family = "chart",
 }: Pick<CommonChartProps<T>, "figureLabel" | "title" | "description" | "source" | "theme" | "appearance" | "height" | "className" | "style" | "animate" | "showLegend"> & {
   legend?: LegendItem[]; hidden?: Set<string>; onLegendToggle?: (key: string) => void; tooltip?: TooltipState; children: ReactNode; family?: ChartFamily;
@@ -32,12 +34,12 @@ function ChartFrame<T extends ChartDatum>({
   return (
     <figure className={`ck-chart ck-${family}${animate ? " ck-animate" : ""} ${className}`.trim()} style={{ ...themeStyle(resolved), ...style }} data-family={family} data-theme={resolved.id}>
       {(title || description) && <figcaption className="ck-header">{figureLabel !== "" && <span className="ck-figure-label">{figureLabel ?? `Figure / ${family}`}</span>}{title && <h3 className="ck-title">{title}</h3>}{description && <p className="ck-description">{description}</p>}</figcaption>}
-      {tooltip && <div className="ck-tooltip" role="status" style={{ left: tooltip.x, top: tooltip.y }}>{tooltip.color && <span className="ck-tooltip-dot" style={{ background: tooltip.color }} />}{tooltip.label}</div>}
-      <div className="ck-plot" style={{ minHeight: height }}>{children}</div>
+      <ChartTooltip tip={tooltip ?? null} />
+      <div className="ck-plot">{children}</div>
       {showLegend && legend.length > 1 && <div className="ck-legend" aria-label="Chart series">
         {legend.map((item) => onLegendToggle ? <button aria-pressed={!hidden.has(item.key)} key={item.key} onClick={() => onLegendToggle(item.key)} type="button"><span className="ck-swatch" style={{ background: item.color }} />{item.label}</button> : <span className="ck-legend-item" key={item.key}><span className="ck-swatch" style={{ background: item.color }} />{item.label}</span>)}
       </div>}
-      {source && <p className="ck-source"><span>Source · {source}</span><span className="ck-signature">ChartKit</span></p>}
+      {source && <p className="ck-source"><span>Source · {source}</span><span className="ck-signature">Generative Charts</span></p>}
     </figure>
   );
 }
@@ -70,14 +72,15 @@ function markEvents<T extends ChartDatum>(
   const activate = () => props.onDatumClick?.(datum, series);
   return {
     tabIndex: 0, role: "button", "aria-label": text,
-    onMouseEnter: show, onMouseLeave: () => setTooltip(null), onFocus: show, onBlur: () => setTooltip(null), onClick: activate,
-    onKeyDown: (event: KeyboardEvent<SVGElement>) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(); } },
+    onMouseEnter: show, onMouseLeave: () => setTooltip(null), onFocus: show, onBlur: () => setTooltip(null), onClick: (event: MouseEvent<SVGElement>) => { show(event); activate(); },
+    onKeyDown: (event: KeyboardEvent<SVGElement>) => { if (event.key === "Escape") setTooltip(null); if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(); } },
   };
 }
 
 function SvgCanvas({ id, height, label, description, children }: { id: string; height: number; label: string; description?: string; children: ReactNode }) {
+  const WIDTH = useChartWidth();
   return <svg aria-describedby={`${id}-desc`} aria-label={label} className="ck-svg" role="img" viewBox={`0 0 ${WIDTH} ${height}`}>
-    <desc id={`${id}-desc`}>{description ?? `${label} rendered with ChartKit.`}</desc>{children}
+    <desc id={`${id}-desc`}>{description ?? `${label} rendered with Generative Charts.`}</desc>{children}
   </svg>;
 }
 
@@ -125,6 +128,7 @@ function rowTypeCode(row: ChartDatum) {
 }
 
 function MonoTypeLegend({ stroke }: { stroke: string }) {
+  const WIDTH = useChartWidth();
   return <g className="ck-mono-type-legend" transform={`translate(${WIDTH - 410} 28)`}>
     <rect fill="none" height="20" stroke={stroke} width="34" />
     <text x="48" y="15">AI-NATIVE</text>
@@ -133,12 +137,13 @@ function MonoTypeLegend({ stroke }: { stroke: string }) {
   </g>;
 }
 
-export function BarChart<T extends ChartDatum>({ variant = "vertical", layout = "grouped", ...props }: BarChartProps<T>) {
+function BarChartContent<T extends ChartDatum>({ variant = "vertical", layout = "grouped", ...props }: BarChartProps<T>) {
+  const WIDTH = useChartWidth();
   const { data, categoryKey, series, height = 380 } = props;
   const id = useId().replace(/:/g, ""); const theme = resolveTheme(props.theme, props.appearance); const colors = theme.familyId === "mono-editorial" ? series.map((_, index) => index === 0 ? theme.tokens.text : theme.tokens.axis) : paletteFor(theme, series);
   const { hidden, toggle, active } = useSeriesState(series); const [tooltip, setTooltip] = useState<TooltipState>(null);
   if (!hasUsableData(data, series.map((item) => item.dataKey))) return <EmptyChart {...props} />;
-  const labels = data.map((row) => String(row[categoryKey] ?? "")); const values = data.flatMap((row) => active.map((item) => numberValue(row[item.dataKey]))); const monoRanked = theme.familyId === "mono-editorial" && variant === "horizontal" && layout === "grouped" && active.length === 1 && values.every((value) => value === null || value >= 0); const top = monoRanked ? 44 : 18; const bottom = monoRanked ? 60 : 42; const left = variant === "horizontal" ? (monoRanked ? 230 : 112) : MARGIN.left; const right = monoRanked ? 70 : 28;
+  const labels = data.map((row) => String(row[categoryKey] ?? "")); const values = data.flatMap((row) => active.map((item) => numberValue(row[item.dataKey]))); const monoRanked = theme.familyId === "mono-editorial" && variant === "horizontal" && layout === "grouped" && active.length === 1 && values.every((value) => value === null || value >= 0); const top = monoRanked ? 44 : 18; const bottom = monoRanked ? 60 : 42; const left = variant === "horizontal" ? (monoRanked ? Math.min(230, WIDTH * .5) : Math.min(112, WIDTH * .36)) : MARGIN.left; const right = monoRanked ? 38 : 28;
   const plotW = WIDTH - left - right; const plotH = height - top - bottom;
   const stackExtents = data.flatMap((row) => { let positive = 0; let negative = 0; active.forEach((item) => { const value = numberValue(row[item.dataKey]) ?? 0; if (value >= 0) positive += value; else negative += value; }); return [negative, positive]; });
   const domain = extent(layout === "stacked" ? stackExtents : values, true); const format = props.valueFormatter ?? defaultFormat;
@@ -149,17 +154,17 @@ export function BarChart<T extends ChartDatum>({ variant = "vertical", layout = 
       {theme.familyId !== "mono-editorial" && <defs>{series.map((item, index) => <linearGradient id={`${id}-bar-${index}`} key={item.dataKey} x1="0" x2={variant === "horizontal" ? "1" : "0"} y1="0" y2={variant === "horizontal" ? "0" : "1"}>{theme.familyId === "neon-instruments" ? <><stop offset="0%" stopColor={colors[index]} /><stop offset="100%" stopColor={colors[index]} stopOpacity=".78" /></> : <><stop offset="0%" stopColor={colors[index]} /><stop offset="100%" stopColor={colors[index]} stopOpacity=".88" /></>}</linearGradient>)}<linearGradient id={`${id}-bar-negative`} x1="0" x2={variant === "horizontal" ? "1" : "0"} y1="0" y2={variant === "horizontal" ? "0" : "1"}><stop offset="0%" stopColor="var(--ck-negative)" /><stop offset="100%" stopColor="var(--ck-negative)" stopOpacity={theme.familyId === "neon-instruments" ? ".78" : ".88"} /></linearGradient></defs>}
       {variant === "vertical" ? <>
         <GridY domain={yValue.domain() as [number, number]} y={yValue} plotRight={left + plotW} format={format} />
-        {data.flatMap((row, rowIndex) => { let positive = 0; let negative = 0; return active.map((item) => { const originalIndex = series.indexOf(item); const value = numberValue(row[item.dataKey]) ?? 0; const start = layout === "stacked" ? (value >= 0 ? positive : negative) : 0; const end = start + value; if (layout === "stacked") { if (value >= 0) positive = end; else negative = end; } const band = xCategory(labels[rowIndex]) ?? left; const groupW = xCategory.bandwidth(); const width = layout === "stacked" ? groupW : groupW / Math.max(active.length, 1); const x = band + (layout === "stacked" ? 0 : active.indexOf(item) * width); const y0 = yValue(start); const y1 = yValue(end); const markColor = value < 0 ? theme.tokens.negative : colors[originalIndex]; return <rect {...markEvents(row, item, value, labels[rowIndex], setTooltip, props, markColor)} className={`ck-mark ck-bar-mark${value < 0 ? " ck-negative-mark" : ""}${theme.familyId === "mono-editorial" ? ` ck-mono-bar ck-mono-bar-${originalIndex % 2 === 0 ? "primary" : "secondary"}` : ""}`} data-sign={value < 0 ? "negative" : "positive"} key={`${rowIndex}-${item.dataKey}`} x={x} y={Math.min(y0, y1)} width={Math.max(width - 2, 1)} height={Math.abs(y1 - y0)} rx={theme.tokens.markRadius} fill={theme.familyId === "mono-editorial" ? "transparent" : `url(#${id}-bar-${value < 0 ? "negative" : originalIndex})`} stroke={theme.familyId === "mono-editorial" ? markColor : "var(--ck-mark-highlight)"} strokeOpacity={theme.familyId === "mono-editorial" ? 1 : .34} style={{ "--ck-index": rowIndex + originalIndex } as CSSProperties} />; }); })}
+        {data.flatMap((row, rowIndex) => { let positive = 0; let negative = 0; return active.map((item) => { const originalIndex = series.indexOf(item); const value = numberValue(row[item.dataKey]) ?? 0; const start = layout === "stacked" ? (value >= 0 ? positive : negative) : 0; const end = start + value; if (layout === "stacked") { if (value >= 0) positive = end; else negative = end; } const band = xCategory(labels[rowIndex]) ?? left; const groupW = xCategory.bandwidth(); const width = layout === "stacked" ? groupW : groupW / Math.max(active.length, 1); const x = band + (layout === "stacked" ? 0 : active.indexOf(item) * width); const y0 = yValue(start); const y1 = yValue(end); const markColor = value < 0 ? theme.tokens.negative : colors[originalIndex]; return <rect {...markEvents(row, item, value, labels[rowIndex], setTooltip, props, markColor)} className={`ck-mark ck-bar-mark ck-bar-vertical${value < 0 ? " ck-negative-mark" : ""}${theme.familyId === "mono-editorial" ? ` ck-mono-bar ck-mono-bar-${originalIndex % 2 === 0 ? "primary" : "secondary"}` : ""}`} data-sign={value < 0 ? "negative" : "positive"} key={`${rowIndex}-${item.dataKey}`} x={x} y={Math.min(y0, y1)} width={Math.max(width - 2, 1)} height={Math.abs(y1 - y0)} rx={theme.tokens.markRadius} fill={theme.familyId === "mono-editorial" ? "transparent" : `url(#${id}-bar-${value < 0 ? "negative" : originalIndex})`} stroke={theme.familyId === "mono-editorial" ? markColor : "var(--ck-mark-highlight)"} strokeOpacity={theme.familyId === "mono-editorial" ? 1 : .34} style={{ "--ck-index": rowIndex + originalIndex } as CSSProperties} />; }); })}
         {labels.map((label) => <text className="ck-axis-text" key={label} x={(xCategory(label) ?? 0) + xCategory.bandwidth() / 2} y={height - 14} textAnchor="middle">{label}</text>)}
       </> : monoRanked ? <>
         {ticks(domain[0], domain[1], 5).filter((tick) => tick >= 0).map((tick) => <g key={tick}><line className={`ck-grid ck-ranked-grid${tick === 0 ? " ck-zero-grid" : ""}`} x1={xValue(tick)} x2={xValue(tick)} y1={top} y2={top + plotH} /><text className="ck-axis-text" x={xValue(tick)} y={height - 28} textAnchor="middle">{format(tick)}</text></g>)}
-        <text className="ck-ranked-header" x="24" y="24">RANK</text><text className="ck-ranked-header" x="68" y="24">PRODUCT</text><text className="ck-ranked-header" textAnchor="end" x={WIDTH - 20} y="24">{active[0]?.label.toUpperCase()}</text>
-        {data.map((row, rowIndex) => { const item = active[0]; const value = Math.max(0, numberValue(row[item.dataKey]) ?? 0); const y = (yCategory(labels[rowIndex]) ?? top) + yCategory.bandwidth() / 2; const barHeight = Math.min(24, yCategory.bandwidth() * .78); const enhanced = rowTypeCode(row) === "ENH"; const rankedProps = { ...props, showTooltip: props.showTooltip === true }; return <g key={`${rowIndex}-${item.dataKey}`}><line className="ck-ranked-row" x1="24" x2={WIDTH - 20} y1={y + yCategory.bandwidth() / 2 + 5} y2={y + yCategory.bandwidth() / 2 + 5} /><text className={`ck-ranked-rank${rowIndex === 0 ? " ck-ranked-lead" : ""}`} x="24" y={y + 4}>{String(rowIndex + 1).padStart(2, "0")}</text><text className="ck-ranked-product" x="68" y={y + 4}>{labels[rowIndex]}</text><rect {...markEvents(row, item, value, labels[rowIndex], setTooltip, rankedProps, "var(--ck-text)")} className="ck-mark ck-bar-mark ck-ranked-bar" fill={rowIndex === 0 ? "var(--ck-surface)" : "transparent"} height={barHeight} rx="1" stroke={rowIndex === 0 ? "var(--ck-text)" : "var(--ck-axis)"} strokeDasharray={enhanced ? "6 4" : undefined} style={{ "--ck-index": rowIndex } as CSSProperties} width={Math.max(xValue(value) - left, 4)} x={left} y={y - barHeight / 2} /><text className={`ck-ranked-value${rowIndex === 0 ? " ck-ranked-lead" : ""}`} textAnchor="end" x={WIDTH - 20} y={y + 4}>{format(value)}</text></g>; })}
+        <text className="ck-ranked-header" x="12" y="24">#</text><text className="ck-ranked-header" x="48" y="24">PRODUCT</text><text className="ck-ranked-header" textAnchor="end" x={WIDTH - 20} y="24">{active[0]?.label.toUpperCase()}</text>
+        {data.map((row, rowIndex) => { const item = active[0]; const value = Math.max(0, numberValue(row[item.dataKey]) ?? 0); const y = (yCategory(labels[rowIndex]) ?? top) + yCategory.bandwidth() / 2; const barHeight = Math.min(24, yCategory.bandwidth() * .78); const enhanced = rowTypeCode(row) === "ENH"; const rankedProps = { ...props, showTooltip: props.showTooltip === true }; return <g key={`${rowIndex}-${item.dataKey}`}><line className="ck-ranked-row" x1="24" x2={WIDTH - 20} y1={y + yCategory.bandwidth() / 2 + 5} y2={y + yCategory.bandwidth() / 2 + 5} /><text className={`ck-ranked-rank${rowIndex === 0 ? " ck-ranked-lead" : ""}`} x="24" y={y + 4}>{String(rowIndex + 1).padStart(2, "0")}</text><text className="ck-ranked-product" x="48" y={y + 4}>{labels[rowIndex]}</text><rect {...markEvents(row, item, value, labels[rowIndex], setTooltip, rankedProps, "var(--ck-text)")} className="ck-mark ck-bar-mark ck-bar-horizontal ck-ranked-bar" fill={rowIndex === 0 ? "var(--ck-surface)" : "transparent"} height={barHeight} rx="1" stroke={rowIndex === 0 ? "var(--ck-text)" : "var(--ck-axis)"} strokeDasharray={enhanced ? "6 4" : undefined} style={{ "--ck-index": rowIndex } as CSSProperties} width={Math.max(xValue(value) - left, 4)} x={left} y={y - barHeight / 2} /><text className={`ck-ranked-value${rowIndex === 0 ? " ck-ranked-lead" : ""}`} textAnchor="end" x={WIDTH - 20} y={y + 4}>{format(value)}</text></g>; })}
         <line className="ck-axis" x1={left} x2={left + plotW} y1={top + plotH} y2={top + plotH} />
         <text className="ck-ranked-axis-title" textAnchor="middle" x={left + plotW / 2} y={height - 7}>{active[0]?.label.toUpperCase()}</text>
       </> : <>
         {ticks(domain[0], domain[1], 4).map((tick) => <g key={tick}><line className={`ck-grid${tick === 0 ? " ck-zero-grid" : ""}`} x1={xValue(tick)} x2={xValue(tick)} y1={top} y2={top + plotH} /><text className="ck-axis-text" x={xValue(tick)} y={height - 14} textAnchor="middle">{format(tick)}</text></g>)}
-        {data.flatMap((row, rowIndex) => { let positive = 0; let negative = 0; return active.map((item) => { const originalIndex = series.indexOf(item); const value = numberValue(row[item.dataKey]) ?? 0; const start = layout === "stacked" ? (value >= 0 ? positive : negative) : 0; const end = start + value; if (layout === "stacked") { if (value >= 0) positive = end; else negative = end; } const band = yCategory(labels[rowIndex]) ?? top; const groupH = yCategory.bandwidth(); const barH = layout === "stacked" ? groupH : groupH / Math.max(active.length, 1); const y = band + (layout === "stacked" ? 0 : active.indexOf(item) * barH); const x0 = xValue(start); const x1 = xValue(end); const markColor = value < 0 ? theme.tokens.negative : colors[originalIndex]; return <rect {...markEvents(row, item, value, labels[rowIndex], setTooltip, props, markColor)} className={`ck-mark ck-bar-mark${value < 0 ? " ck-negative-mark" : ""}${theme.familyId === "mono-editorial" ? ` ck-mono-bar ck-mono-bar-${originalIndex % 2 === 0 ? "primary" : "secondary"}` : ""}`} data-sign={value < 0 ? "negative" : "positive"} key={`${rowIndex}-${item.dataKey}`} x={Math.min(x0, x1)} y={y} width={Math.abs(x1 - x0)} height={Math.max(barH - 2, 1)} rx={theme.tokens.markRadius} fill={theme.familyId === "mono-editorial" ? "transparent" : `url(#${id}-bar-${value < 0 ? "negative" : originalIndex})`} stroke={theme.familyId === "mono-editorial" ? markColor : "var(--ck-mark-highlight)"} strokeOpacity={theme.familyId === "mono-editorial" ? 1 : .34} style={{ "--ck-index": rowIndex + originalIndex } as CSSProperties} />; }); })}
+        {data.flatMap((row, rowIndex) => { let positive = 0; let negative = 0; return active.map((item) => { const originalIndex = series.indexOf(item); const value = numberValue(row[item.dataKey]) ?? 0; const start = layout === "stacked" ? (value >= 0 ? positive : negative) : 0; const end = start + value; if (layout === "stacked") { if (value >= 0) positive = end; else negative = end; } const band = yCategory(labels[rowIndex]) ?? top; const groupH = yCategory.bandwidth(); const barH = layout === "stacked" ? groupH : groupH / Math.max(active.length, 1); const y = band + (layout === "stacked" ? 0 : active.indexOf(item) * barH); const x0 = xValue(start); const x1 = xValue(end); const markColor = value < 0 ? theme.tokens.negative : colors[originalIndex]; return <rect {...markEvents(row, item, value, labels[rowIndex], setTooltip, props, markColor)} className={`ck-mark ck-bar-mark ck-bar-horizontal${value < 0 ? " ck-negative-mark" : ""}${theme.familyId === "mono-editorial" ? ` ck-mono-bar ck-mono-bar-${originalIndex % 2 === 0 ? "primary" : "secondary"}` : ""}`} data-sign={value < 0 ? "negative" : "positive"} key={`${rowIndex}-${item.dataKey}`} x={Math.min(x0, x1)} y={y} width={Math.abs(x1 - x0)} height={Math.max(barH - 2, 1)} rx={theme.tokens.markRadius} fill={theme.familyId === "mono-editorial" ? "transparent" : `url(#${id}-bar-${value < 0 ? "negative" : originalIndex})`} stroke={theme.familyId === "mono-editorial" ? markColor : "var(--ck-mark-highlight)"} strokeOpacity={theme.familyId === "mono-editorial" ? 1 : .34} style={{ "--ck-index": rowIndex + originalIndex } as CSSProperties} />; }); })}
         {labels.map((label) => <text className="ck-axis-text" key={label} x={left - 12} y={(yCategory(label) ?? 0) + yCategory.bandwidth() / 2 + 4} textAnchor="end">{label}</text>)}
       </>}
     </SvgCanvas>
@@ -167,6 +172,7 @@ export function BarChart<T extends ChartDatum>({ variant = "vertical", layout = 
 }
 
 function CartesianBase<T extends ChartDatum>({ kind, props, stacked = false }: { kind: "line" | "area"; props: LineChartProps<T> | AreaChartProps<T>; stacked?: boolean }) {
+  const WIDTH = useChartWidth();
   const { data, xKey, series, height = 380 } = props; const id = useId().replace(/:/g, ""); const theme = resolveTheme(props.theme, props.appearance); const colors = paletteFor(theme, series);
   const { hidden, toggle, active } = useSeriesState(series); const [tooltip, setTooltip] = useState<TooltipState>(null);
   if (!hasUsableData(data, series.map((item) => item.dataKey))) return <EmptyChart {...props} />;
@@ -191,21 +197,27 @@ function CartesianBase<T extends ChartDatum>({ kind, props, stacked = false }: {
         const last = points[points.length - 1]; const labelX = Math.min(last.x + 14, plotRight - 160); const labelY = Math.max(MARGIN.top + 4, last.y - 34);
         return <g key={item.dataKey}>
           {kind === "area" && <path className="ck-area-material ck-mark" d={areaPath} fill={`url(#${id}-${kind}-material-${originalIndex})`} stroke="none" style={{ "--ck-index": originalIndex } as CSSProperties} />}
-          {theme.familyId !== "mono-editorial" && <path className="ck-line-underlay" d={linePath} fill="none" stroke="var(--ck-line-underlay)" strokeLinecap="round" strokeLinejoin="round" strokeWidth={kind === "line" ? 9 : 7} />}
-          <path className={`ck-line-trace ck-mark${monoSecondary ? " ck-line-secondary" : ""}`} d={linePath} fill="none" stroke={traceColor} strokeLinecap="round" strokeLinejoin="round" strokeWidth={kind === "line" ? 3 : 2.5} style={{ "--ck-index": originalIndex } as CSSProperties} />
+          {kind === "line" && <defs><mask id={`${id}-draw-${originalIndex}`} maskUnits="userSpaceOnUse" x="0" y="0" width={WIDTH} height={height}><path className="ck-line-draw" d={linePath} fill="none" pathLength="1" stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="24" style={{ "--ck-index": originalIndex } as CSSProperties} /></mask></defs>}
+          <g mask={kind === "line" ? `url(#${id}-draw-${originalIndex})` : undefined}>
+            {theme.familyId !== "mono-editorial" && <path className={`ck-line-underlay${kind === "area" ? " ck-line-reveal" : ""}`} d={linePath} fill="none" stroke="var(--ck-line-underlay)" strokeLinecap="round" strokeLinejoin="round" strokeWidth={kind === "line" ? 9 : 7} />}
+            <path className={`ck-line-trace${kind === "area" ? " ck-mark" : ""}${monoSecondary ? " ck-line-secondary" : ""}`} d={linePath} fill="none" stroke={traceColor} strokeLinecap="round" strokeLinejoin="round" strokeWidth={kind === "line" ? 3 : 2.5} style={{ "--ck-index": originalIndex } as CSSProperties} />
+          </g>
           {(kind === "area" || (props as LineChartProps<T>).showPoints !== false) && points.map((point, index) => <g key={index}>{(index === 0 || index === points.length - 1) && <circle className="ck-point-halo" cx={point.x} cy={point.y} fill="var(--ck-point-halo)" r="9" />}<circle {...markEvents(point.row, item, point.value, point.label, setTooltip, props, traceColor)} className="ck-mark ck-point" cx={point.x} cy={point.y} r={index === 0 || index === points.length - 1 ? 4.5 : 3.5} fill="var(--ck-point-fill)" stroke={traceColor} strokeWidth="2" style={{ "--ck-index": index } as CSSProperties} /></g>)}
-          {!compact && originalIndex === 0 && active.length === 1 && <g className="ck-end-label" transform={`translate(${labelX} ${labelY})`}><line x1={last.x - labelX} x2="0" y1={last.y - labelY} y2="29" /><rect height="60" rx="5" width="156" /><text className="ck-end-label-kicker" x="13" y="22">LATEST · {last.label}</text><text x="13" y="48">{format(last.value)}</text></g>}
+          {!compact && WIDTH >= 520 && originalIndex === 0 && active.length === 1 && <g className="ck-end-label" transform={`translate(${labelX} ${labelY})`}><line x1={last.x - labelX} x2="0" y1={last.y - labelY} y2="29" /><rect height="60" rx="5" width="156" /><text className="ck-end-label-kicker" x="13" y="22">LATEST · {last.label}</text><text x="13" y="48">{format(last.value)}</text></g>}
         </g>;
       })}
-      {!compact && labels.filter((_, index) => index % Math.max(1, Math.ceil(labels.length / 6)) === 0).map((label) => <text className="ck-axis-text" key={label} x={x(label)} y={height - 14} textAnchor="middle">{label}</text>)}
+      {!compact && labels.filter((_, index) => index % Math.max(1, Math.ceil(labels.length / Math.max(2, Math.min(6, Math.floor(WIDTH / 65))))) === 0).map((label) => <text className="ck-axis-text" key={label} x={x(label)} y={height - 14} textAnchor="middle">{label}</text>)}
     </SvgCanvas>
   </ChartFrame>;
 }
 
-export function LineChart<T extends ChartDatum>(props: LineChartProps<T>) { return <CartesianBase kind="line" props={props} />; }
-export function AreaChart<T extends ChartDatum>(props: AreaChartProps<T>) { return <CartesianBase kind="area" props={props} stacked={props.stacked} />; }
+function LineChartContent<T extends ChartDatum>(props: LineChartProps<T>) {
+  return <CartesianBase kind="line" props={props} />; }
+function AreaChartContent<T extends ChartDatum>(props: AreaChartProps<T>) {
+  return <CartesianBase kind="area" props={props} stacked={props.stacked} />; }
 
-export function ScatterChart<T extends ChartDatum>(props: ScatterChartProps<T>) {
+function ScatterChartContent<T extends ChartDatum>(props: ScatterChartProps<T>) {
+  const WIDTH = useChartWidth();
   const { data, xKey, series, height = 380, size = 6, sizeKey } = props; const id = useId().replace(/:/g, ""); const theme = resolveTheme(props.theme, props.appearance); const colors = paletteFor(theme, series);
   const { hidden, toggle, active } = useSeriesState(series); const [tooltip, setTooltip] = useState<TooltipState>(null);
   if (!hasUsableData(data, [xKey, ...series.map((item) => item.dataKey)])) return <EmptyChart {...props} />;
@@ -216,18 +228,19 @@ export function ScatterChart<T extends ChartDatum>(props: ScatterChartProps<T>) 
   return <ChartFrame {...props} family="scatter" height={height} legend={legendFor(series, colors)} hidden={hidden} onLegendToggle={toggle} tooltip={tooltip}><SvgCanvas id={id} height={height} label={props.ariaLabel ?? props.title ?? "Scatter chart"} description={props.description}>
     <text className="ck-axis-title" x={MARGIN.left} y={MARGIN.top - 8}>{active[0]?.label.toUpperCase()}</text>
     <GridY domain={y.domain() as [number, number]} y={y} plotRight={WIDTH - MARGIN.right} format={format} />
-    {ticks(xDomain[0], xDomain[1], 5).map((tick) => <text className="ck-axis-text" key={tick} x={x(tick)} y={height - 14} textAnchor="middle">{format(tick)}</text>)}
+    {ticks(xDomain[0], xDomain[1], 5).map((tick) => <text className="ck-axis-text" key={tick} x={x(tick)} y={height - 26} textAnchor="middle">{format(tick)}</text>)}
     {data.flatMap((row, rowIndex) => active.map((item) => { const originalIndex = series.indexOf(item); const xv = numberValue(row[xKey]); const value = numberValue(row[item.dataKey]); if (xv === null || value === null) return null; const rawSize = numberValue(row[sizeKey ?? xKey]) ?? size; const radius = sizeKey ? Math.max(4, Math.min(16, Math.sqrt(Math.max(0, rawSize) / maxSize) * 16)) : size; return <g key={`${rowIndex}-${item.dataKey}`}><circle className="ck-point-halo" cx={x(xv)} cy={y(value)} fill="var(--ck-point-halo)" r={radius + 6} /><circle {...markEvents(row, item, value, `${String(row[xKey])}`, setTooltip, props, colors[originalIndex])} className="ck-mark ck-point" cx={x(xv)} cy={y(value)} r={radius} fill={colors[originalIndex]} fillOpacity=".78" stroke="var(--ck-point-stroke)" strokeWidth="2" style={{ "--ck-index": rowIndex } as CSSProperties} /></g>; }))}
-    <text className="ck-axis-title" textAnchor="end" x={WIDTH - MARGIN.right} y={height - 14}>{String(xKey).toUpperCase()}</text>
+    <text className="ck-axis-title" textAnchor="end" x={WIDTH - MARGIN.right} y={height - 6}>{String(xKey).toUpperCase()}</text>
   </SvgCanvas></ChartFrame>;
 }
 
 function ExtrudedPie<T extends ChartDatum>({ items, id, height, theme, props, setTooltip }: { items: RadialItem<T>[]; id: string; height: number; theme: ResolvedChartTheme; props: PieChartProps<T>; setTooltip: (tooltip: TooltipState) => void }) {
+  const WIDTH = useChartWidth();
   const total = items.reduce((sum, item) => sum + item.value, 0) || 1;
   const slices = pie<RadialItem<T>>().sort(null).padAngle(.012).value((item) => item.value)(items);
-  const compact = height < 280;
-  const radius = compact ? Math.max(112, Math.min(132, height * .58)) : Math.max(112, Math.min(154, height * .42)), scaleY = .56, depth = Math.min(44, height * .12);
-  const originX = WIDTH * .44, originY = height * (compact ? .51 : .54);
+  const narrow = WIDTH < 560; const compact = height < 280;
+  const radius = narrow ? Math.min(120, WIDTH * .36) : compact ? Math.max(112, Math.min(132, height * .58)) : Math.max(112, Math.min(154, height * .42)), scaleY = .56, depth = Math.min(44, height * .12);
+  const originX = narrow ? WIDTH / 2 : WIDTH * .44, originY = narrow ? height * .35 : height * (compact ? .51 : .54);
   const arcPath = arc<(typeof slices)[number]>().innerRadius(0).outerRadius(radius).cornerRadius(theme.tokens.markRadius * .2);
   const mono = monoRadialColors(theme.appearance);
   const colors = items.map((_, index) => theme.tokens.palette[index % theme.tokens.palette.length]);
@@ -245,22 +258,24 @@ function ExtrudedPie<T extends ChartDatum>({ items, id, height, theme, props, se
   const hasTypes = items.some((item) => rowTypeCode(item.row));
   return <SvgCanvas id={id} height={height} label={props.ariaLabel ?? props.title ?? "Extruded pie chart"} description={props.description}>
     {theme.familyId !== "mono-editorial" && <defs>{items.map((item, index) => <linearGradient id={`${id}-extruded-${index}`} key={item.name} x1="0" x2="0" y1="0" y2="1">{theme.familyId === "neon-instruments" ? <><stop offset="0%" stopColor={colors[index]} /><stop offset="100%" stopColor={colors[index]} stopOpacity=".76" /></> : <><stop offset="0%" stopColor="var(--ck-mark-highlight)" stopOpacity=".42" /><stop offset="12%" stopColor={colors[index]} /><stop offset="100%" stopColor={colors[index]} stopOpacity=".82" /></>}</linearGradient>)}</defs>}
-    {hasTypes && <MonoTypeLegend stroke="var(--ck-text)" />}
+    {hasTypes && !narrow && <MonoTypeLegend stroke="var(--ck-text)" />}
     <ellipse className="ck-extruded-shadow" cx={originX} cy={originY + depth + radius * scaleY * .48} rx={radius * .82} ry={radius * scaleY * .38} />
     {walls.map((wall, index) => <path className="ck-extruded-wall" d={wall.d} fill={theme.familyId === "mono-editorial" ? mono.sides[wall.index % mono.sides.length] : colors[wall.index]} key={`wall-${index}`} stroke={theme.familyId === "mono-editorial" ? mono.wallEdge : "var(--ck-border-strong)"} strokeDasharray={rowTypeCode(items[wall.index].row) === "ENH" ? "6 4" : undefined} />)}
     <g transform={`translate(${originX} ${originY}) scale(1 ${scaleY})`}>{slices.map((slice, index) => <path {...markEvents(items[index].row, synthetic, items[index].value, items[index].name, setTooltip, props, colors[index])} className="ck-mark ck-extruded-slice" d={arcPath(slice) ?? ""} fill={theme.familyId === "mono-editorial" ? mono.tops[index % mono.tops.length] : `url(#${id}-extruded-${index})`} key={items[index].name} stroke={index === leadIndex ? "var(--ck-text)" : "var(--ck-border-strong)"} strokeDasharray={rowTypeCode(items[index].row) === "ENH" ? "6 4" : undefined} strokeWidth={index === leadIndex ? 1.6 : 1.1} style={{ "--ck-index": index } as CSSProperties} />)}</g>
-    {labels.map((item) => { const align = item.side === "left" ? "end" : "start"; const endX = item.side === "left" ? item.textX + 12 : item.textX - 12; return <g className="ck-extruded-label" key={`label-${item.index}`}><polyline points={`${item.marker.x},${item.marker.y} ${item.elbowX},${item.marker.y} ${endX},${item.textY}`} /><circle cx={item.marker.x} cy={item.marker.y} r={item.index === leadIndex ? 2.6 : 2} /><text textAnchor={align} x={item.textX} y={item.textY + 4}><tspan className="ck-extruded-share">{item.share}%</tspan><tspan dx={compact ? 7 : 9}>{items[item.index].name.toUpperCase()}</tspan></text></g>; })}
+    {labels.map((original, index) => { const item = narrow ? { ...original, textX: 24, textY: height - 72 + index * 28 } : original; const align = narrow ? "start" : item.side === "left" ? "end" : "start"; const endX = item.side === "left" ? item.textX + 12 : item.textX - 12; return <g className="ck-extruded-label" key={`label-${item.index}`}>{!narrow && <polyline points={`${item.marker.x},${item.marker.y} ${item.elbowX},${item.marker.y} ${endX},${item.textY}`} />}<circle cx={item.marker.x} cy={item.marker.y} r={item.index === leadIndex ? 2.6 : 2} /><text textAnchor={align} x={item.textX} y={item.textY + 4}><tspan className="ck-extruded-share">{item.share}%</tspan><tspan dx={compact ? 7 : 9}>{items[item.index].name.toUpperCase()}</tspan></text></g>; })}
   </SvgCanvas>;
 }
 
-function MonoEditorialPie<T extends ChartDatum>({ items, id, height, props, setTooltip, variant = "pie" }: { items: RadialItem<T>[]; id: string; height: number; props: PieChartProps<T>; setTooltip: (tooltip: TooltipState) => void; variant?: "pie" | "donut" }) {
+function MonoEditorialPie<T extends ChartDatum>({ items, id, height: requestedHeight, props, setTooltip, variant = "pie" }: { items: RadialItem<T>[]; id: string; height: number; props: PieChartProps<T>; setTooltip: (tooltip: TooltipState) => void; variant?: "pie" | "donut" }) {
+  const WIDTH = useChartWidth();
   const total = items.reduce((sum, item) => sum + item.value, 0) || 1;
   const slices = pie<RadialItem<T>>().sort(null).padAngle(.008).value((item) => item.value)(items);
-  const compact = height < 320; const radius = Math.min(compact ? 104 : 124, height / 2 - 26); const cx = compact ? 212 : 222; const cy = height / 2 - 2;
+  const narrow = WIDTH < 560; const height = narrow ? Math.max(requestedHeight, 600) : requestedHeight;
+  const compact = height < 320; const radius = Math.min(compact ? 104 : 124, height / 2 - 26); const cx = narrow ? WIDTH / 2 : WIDTH * .26; const cy = narrow ? 132 : height / 2 - 2;
   const arcPath = arc<(typeof slices)[number]>().innerRadius(variant === "donut" ? radius * .56 : 0).outerRadius(radius);
   const leadIndex = items.reduce((best, item, index) => item.value > items[best].value ? index : best, 0);
   const synthetic: Series<T> = { dataKey: props.valueKey, label: "Value" }; const format = props.valueFormatter ?? defaultFormat;
-  const ledgerTop = 46; const ledgerLeft = 424; const ledgerRight = WIDTH - 24; const rowGap = Math.min(43, (height - ledgerTop - 22) / Math.max(items.length, 1));
+  const ledgerTop = narrow ? 340 : 46; const ledgerLeft = narrow ? 16 : WIDTH * .52; const ledgerRight = WIDTH - 24; const rowGap = Math.min(43, (height - ledgerTop - 22) / Math.max(items.length, 1));
   return <SvgCanvas id={id} height={height} label={props.ariaLabel ?? props.title ?? "Pie chart"} description={props.description}>
     <defs>{items.map((item, index) => <pattern height="8" id={`${id}-mono-pie-${index}`} key={item.name} patternUnits="userSpaceOnUse" width="8">
       <rect fill={index % 6 === 4 ? "var(--ck-text)" : "var(--ck-background)"} height="8" width="8" />
@@ -272,8 +287,8 @@ function MonoEditorialPie<T extends ChartDatum>({ items, id, height, props, setT
     </pattern>)}</defs>
     <g className="ck-mono-pie-guides"><line x1={cx - radius - 16} x2={cx + radius + 16} y1={cy} y2={cy} /><line x1={cx} x2={cx} y1={cy - radius - 16} y2={cy + radius + 16} /><circle cx={cx} cy={cy} fill="none" r={radius + 8} /></g>
     <g transform={`translate(${cx} ${cy})`}>{slices.map((slice, index) => <path {...markEvents(items[index].row, synthetic, items[index].value, items[index].name, setTooltip, props, "var(--ck-text)")} className="ck-mark ck-mono-pie-slice" d={arcPath(slice) ?? ""} fill={`url(#${id}-mono-pie-${index})`} key={items[index].name} stroke="var(--ck-text)" strokeDasharray={rowTypeCode(items[index].row) === "ENH" ? "6 4" : undefined} strokeWidth={index === leadIndex ? 1.8 : 1.15} style={{ "--ck-index": index } as CSSProperties} />)}{variant === "donut" && <><text className="ck-donut-kicker" fill="var(--ck-text-muted)" fontSize="9" fontWeight="750" letterSpacing="1.2" textAnchor="middle" y="-8">TOTAL</text><text fill="var(--ck-text)" fontSize="20" fontWeight="760" textAnchor="middle" y="16">{props.centerLabel ?? format(total)}</text></>}</g>
-    <text className="ck-mono-pie-caption" textAnchor="middle" x={cx} y={height - 10}>SEGMENT DISTRIBUTION · {format(total)}</text>
-    <text className="ck-mono-pie-ledger-header" x={ledgerLeft} y="22">SEGMENT</text><text className="ck-mono-pie-ledger-header" textAnchor="end" x={ledgerRight} y="22">SHARE</text>
+    <text className="ck-mono-pie-caption" textAnchor="middle" x={cx} y={narrow ? 278 : height - 10}>SEGMENT DISTRIBUTION · {format(total)}</text>
+    <text className="ck-mono-pie-ledger-header" x={ledgerLeft} y={ledgerTop - 24}>SEGMENT</text><text className="ck-mono-pie-ledger-header" textAnchor="end" x={ledgerRight} y={ledgerTop - 24}>SHARE</text>
     {items.map((item, index) => { const y = ledgerTop + index * rowGap; const share = Math.round(item.value / total * 100); return <g className="ck-mono-pie-ledger" key={item.name}>
       <text className="ck-mono-pie-rank" x={ledgerLeft} y={y}>{String(index + 1).padStart(2, "0")}</text><rect fill={`url(#${id}-mono-pie-${index})`} height="12" stroke="var(--ck-text)" strokeDasharray={rowTypeCode(item.row) === "ENH" ? "4 3" : undefined} width="18" x={ledgerLeft + 28} y={y - 10} /><text className="ck-mono-pie-name" x={ledgerLeft + 58} y={y}>{item.name.toUpperCase()}</text><text className="ck-mono-pie-share" textAnchor="end" x={ledgerRight} y={y}>{share}%</text>
       {rowTypeCode(item.row) && <text className="ck-mono-pie-type" x={ledgerLeft + 58} y={y + 12}>{rowTypeCode(item.row) === "ENH" ? "AI-ENHANCED" : "AI-NATIVE"}</text>}<line className="ck-mono-pie-rule" x1={ledgerLeft} x2={ledgerRight} y1={y + Math.min(18, rowGap * .44)} y2={y + Math.min(18, rowGap * .44)} />
@@ -281,7 +296,8 @@ function MonoEditorialPie<T extends ChartDatum>({ items, id, height, props, setT
   </SvgCanvas>;
 }
 
-export function PieChart<T extends ChartDatum>(props: PieChartProps<T>) {
+function PieChartContent<T extends ChartDatum>(props: PieChartProps<T>) {
+  const WIDTH = useChartWidth();
   const { data, nameKey, valueKey, variant = "donut", centerLabel, height = 380 } = props; const id = useId().replace(/:/g, ""); const theme = resolveTheme(props.theme, props.appearance); const [tooltip, setTooltip] = useState<TooltipState>(null);
   const clean = data.map((row) => ({ row, name: String(row[nameKey] ?? ""), value: Math.max(0, numberValue(row[valueKey]) ?? 0) })).filter((item) => item.value > 0);
   if (!clean.length) return <EmptyChart {...props} />;
@@ -309,10 +325,11 @@ export function PieChart<T extends ChartDatum>(props: PieChartProps<T>) {
   </SvgCanvas></ChartFrame>;
 }
 
-export function RadarChart<T extends ChartDatum>(props: RadarChartProps<T>) {
+function RadarChartContent<T extends ChartDatum>(props: RadarChartProps<T>) {
+  const WIDTH = useChartWidth();
   const { data, categoryKey, series, height = 420 } = props; const id = useId().replace(/:/g, ""); const theme = resolveTheme(props.theme, props.appearance); const colors = theme.familyId === "mono-editorial" ? series.map(() => theme.tokens.text) : paletteFor(theme, series); const { hidden, toggle, active } = useSeriesState(series); const [tooltip, setTooltip] = useState<TooltipState>(null);
   if (!hasUsableData(data, series.map((item) => item.dataKey)) || data.length < 3) return <EmptyChart {...props} />;
-  const cx = WIDTH / 2, cy = height / 2, radius = Math.min(145, height / 2 - 55); const max = Math.max(1, ...data.flatMap((row) => active.map((item) => numberValue(row[item.dataKey]) ?? 0))); const angle = (index: number) => -Math.PI / 2 + index * Math.PI * 2 / data.length; const point = (index: number, value: number) => [cx + Math.cos(angle(index)) * radius * value / max, cy + Math.sin(angle(index)) * radius * value / max] as const;
+  const cx = WIDTH / 2, cy = height / 2, radius = Math.min(145, height / 2 - 55, (WIDTH - 140) / 2); const max = Math.max(1, ...data.flatMap((row) => active.map((item) => numberValue(row[item.dataKey]) ?? 0))); const angle = (index: number) => -Math.PI / 2 + index * Math.PI * 2 / data.length; const point = (index: number, value: number) => [cx + Math.cos(angle(index)) * radius * value / max, cy + Math.sin(angle(index)) * radius * value / max] as const;
   return <ChartFrame {...props} family="radar" height={height} legend={legendFor(series, colors)} hidden={hidden} onLegendToggle={toggle} tooltip={tooltip}><SvgCanvas id={id} height={height} label={props.ariaLabel ?? props.title ?? "Radar chart"} description={props.description}>
     {theme.familyId !== "mono-editorial" && <defs>{active.map((item) => { const originalIndex = series.indexOf(item); return <radialGradient id={`${id}-radar-${originalIndex}`} key={item.dataKey}><stop offset="0%" stopColor={colors[originalIndex]} stopOpacity=".28" /><stop offset="100%" stopColor={colors[originalIndex]} stopOpacity=".08" /></radialGradient>; })}</defs>}
     {[.25,.5,.75,1].map((step) => <polygon className="ck-grid" fill="none" key={step} points={data.map((_, index) => { const [x,y] = point(index, max * step); return `${x},${y}`; }).join(" ")} />)}
@@ -326,11 +343,12 @@ function mixHex(a: string, b: string, amount: number) {
   const parse = (color: string) => color.replace("#", "").match(/.{2}/g)!.map((value) => parseInt(value, 16)); const aa = parse(a), bb = parse(b); return `rgb(${aa.map((value, index) => Math.round(value + (bb[index] - value) * amount)).join(",")})`;
 }
 
-export function HeatmapChart<T extends ChartDatum>(props: HeatmapChartProps<T>) {
+function HeatmapChartContent<T extends ChartDatum>(props: HeatmapChartProps<T>) {
+  const WIDTH = useChartWidth();
   const { data, xKey, yKey, valueKey, height = 380, lowColor, highColor } = props; const id = useId().replace(/:/g, ""); const theme = resolveTheme(props.theme, props.appearance); const [tooltip, setTooltip] = useState<TooltipState>(null); const synthetic: Series<T> = { dataKey: valueKey, label: "Value" };
   const xLabels = [...new Set(data.map((row) => String(row[xKey] ?? "")))]; const yLabels = [...new Set(data.map((row) => String(row[yKey] ?? "")))]; const values = data.map((row) => numberValue(row[valueKey]));
   if (!hasUsableData(data, [valueKey]) || !xLabels.length || !yLabels.length) return <EmptyChart {...props} />;
-  const domain = extent(values); const x = scaleBand<string>().domain(xLabels).range([90, WIDTH - MARGIN.right]).padding(.1); const y = scaleBand<string>().domain(yLabels).range([MARGIN.top, height - MARGIN.bottom - 28]).padding(.1); const start = lowColor ?? (theme.familyId === "mono-editorial" ? (theme.appearance === "dark" ? "#000000" : "#ffffff") : theme.id.includes("dark") ? "#20252d" : "#e8edf2"); const end = highColor ?? theme.tokens.palette[0];
+  const domain = extent(values); const x = scaleBand<string>().domain(xLabels).range([60, WIDTH - MARGIN.right]).padding(.1); const y = scaleBand<string>().domain(yLabels).range([MARGIN.top, height - MARGIN.bottom - 28]).padding(.1); const start = lowColor ?? (theme.familyId === "mono-editorial" ? (theme.appearance === "dark" ? "#000000" : "#ffffff") : theme.id.includes("dark") ? "#20252d" : "#e8edf2"); const end = highColor ?? theme.tokens.palette[0];
   return <ChartFrame {...props} family="heatmap" height={height} tooltip={tooltip}><SvgCanvas id={id} height={height} label={props.ariaLabel ?? props.title ?? "Heatmap chart"} description={props.description}>
     {theme.familyId === "mono-editorial" ? <defs>{[0, 1, 2, 3, 4].map((band) => <pattern height="8" id={`${id}-heat-${band}`} key={band} patternUnits="userSpaceOnUse" width="8">
       <rect fill={band === 4 ? "var(--ck-text)" : "var(--ck-background)"} height="8" width="8" />
@@ -340,27 +358,28 @@ export function HeatmapChart<T extends ChartDatum>(props: HeatmapChartProps<T>) 
     </pattern>)}</defs> : <defs><linearGradient id={`${id}-heat-legend`}><stop offset="0%" stopColor={start} /><stop offset="100%" stopColor={end} /></linearGradient></defs>}
     {data.map((row, index) => { const value = numberValue(row[valueKey]); if (value === null) return null; const amount = (value - domain[0]) / Math.max(domain[1] - domain[0], 1); const band = Math.min(4, Math.floor(amount * 5)); const xLabel = String(row[xKey] ?? ""), yLabel = String(row[yKey] ?? ""), color = mixHex(start, end, amount); const mono = theme.familyId === "mono-editorial"; return <rect {...markEvents(row, synthetic, value, `${xLabel} · ${yLabel}`, setTooltip, props, mono ? theme.tokens.text : color)} className={`ck-mark ck-heat-cell${mono ? ` ck-mono-heat-cell ck-heat-band-${band}` : ""}`} key={index} x={x(xLabel)} y={y(yLabel)} width={x.bandwidth()} height={y.bandwidth()} rx={theme.tokens.markRadius} fill={mono ? `url(#${id}-heat-${band})` : color} stroke={mono ? "var(--ck-border-strong)" : "var(--ck-mark-highlight)"} strokeOpacity={mono ? 1 : .24} style={{ "--ck-index": index } as CSSProperties} />; })}
     {xLabels.map((label) => <text className="ck-axis-text" key={label} x={(x(label) ?? 0) + x.bandwidth()/2} y={height - 43} textAnchor="middle">{label}</text>)}
-    {yLabels.map((label) => <text className="ck-axis-text" key={label} x={78} y={(y(label) ?? 0) + y.bandwidth()/2 + 4} textAnchor="end">{label}</text>)}
+    {yLabels.map((label) => <text className="ck-axis-text" key={label} x={48} y={(y(label) ?? 0) + y.bandwidth()/2 + 4} textAnchor="end">{label}</text>)}
     <g className="ck-heat-legend" transform={`translate(${WIDTH - MARGIN.right - 170} ${height - 25})`}><text x="-38" y="7">LOW</text>{theme.familyId === "mono-editorial" ? <>{[0, 1, 2, 3, 4].map((band) => <rect fill={`url(#${id}-heat-${band})`} height="8" key={band} stroke="var(--ck-border-strong)" strokeWidth=".6" width="22" x={band * 24} />)}</> : <rect fill={`url(#${id}-heat-legend)`} height="8" rx="4" width="120" />}<text x="128" y="7">HIGH</text></g>
   </SvgCanvas></ChartFrame>;
 }
 
-export function CohortChart<T extends ChartDatum>(props: CohortChartProps<T>) {
+function CohortChartContent<T extends ChartDatum>(props: CohortChartProps<T>) {
+  const WIDTH = useChartWidth();
   const { data, cohortKey, periodKey, valueKey, sizeKey, maxValue = 100, showValues = true, height = 420 } = props;
   const id = useId().replace(/:/g, ""); const theme = resolveTheme(props.theme, props.appearance); const [tooltip, setTooltip] = useState<TooltipState>(null); const synthetic: Series<T> = { dataKey: valueKey, label: "Retention" };
   const cohorts = [...new Set(data.map((row) => String(row[cohortKey] ?? "")))]; const periods = [...new Set(data.map((row) => String(row[periodKey] ?? "")))];
   if (!hasUsableData(data, [valueKey]) || !cohorts.length || !periods.length || maxValue <= 0) return <EmptyChart {...props} />;
-  const left = sizeKey ? 176 : 132, right = 24, top = 52, bottom = 28; const x = scaleBand<string>().domain(periods).range([left, WIDTH - right]).padding(.08); const y = scaleBand<string>().domain(cohorts).range([top, height - bottom]).padding(.1);
+  const left = WIDTH < 480 ? 82 : sizeKey ? 176 : 132, right = 24, top = 52, bottom = 28; const x = scaleBand<string>().domain(periods).range([left, WIDTH - right]).padding(.14); const y = scaleBand<string>().domain(cohorts).range([top, height - bottom]).padding(.18);
   const lookup = new Map(data.map((row) => [`${String(row[cohortKey] ?? "")}\u0000${String(row[periodKey] ?? "")}`, row]));
   const start = theme.familyId === "mono-editorial" ? (theme.appearance === "dark" ? "#11100d" : "#f7f7f2") : theme.appearance === "dark" ? "#20252d" : "#eef1f4"; const end = theme.tokens.palette[0];
   const format = props.valueFormatter ?? ((value: number) => `${defaultFormat(value)}%`);
   return <ChartFrame {...props} family="cohort" height={height} tooltip={tooltip}><SvgCanvas id={id} height={height} label={props.ariaLabel ?? props.title ?? "Cohort retention chart"} description={props.description ?? "Retention by entry cohort and elapsed period. Unavailable recent periods are shown as pending."}>
     {theme.familyId === "mono-editorial" && <defs>{[0, 1, 2, 3, 4].map((band) => <pattern height="8" id={`${id}-cohort-${band}`} key={band} patternUnits="userSpaceOnUse" width="8"><rect fill={band === 4 ? "var(--ck-text)" : "var(--ck-background)"} height="8" width="8" />{band === 1 && <circle cx="4" cy="4" fill="var(--ck-text)" r="1" />}{band === 2 && <path d="M-2 2L2-2M0 8L8 0M6 10L10 6" stroke="var(--ck-text)" strokeWidth=".9" />}{band === 3 && <path d="M-2 2L2-2M0 8L8 0M6 10L10 6M0 0L8 8" stroke="var(--ck-text)" strokeWidth=".8" />}</pattern>)}</defs>}
     <text className="ck-cohort-corner" x={left - 12} y={24} textAnchor="end">COHORT</text>
-    {periods.map((period) => <text className="ck-cohort-period" key={period} textAnchor="middle" x={(x(period) ?? 0) + x.bandwidth() / 2} y={24}>{period}</text>)}
+    {periods.map((period) => <text className="ck-cohort-period" key={period} textAnchor="middle" x={(x(period) ?? 0) + x.bandwidth() / 2} y={24}>{WIDTH < 480 ? period.replace(/^Week /, "W") : period}</text>)}
     {cohorts.map((cohort, cohortIndex) => { const cohortRows = data.filter((row) => String(row[cohortKey] ?? "") === cohort); const cohortSize = sizeKey ? cohortRows.map((row) => numberValue(row[sizeKey])).find((value) => value !== null) ?? null : null; return <g key={cohort}>
-      <text className="ck-cohort-label" textAnchor="end" x={left - 12} y={(y(cohort) ?? 0) + y.bandwidth() / 2 - (cohortSize !== null ? 3 : -4)}>{cohort}</text>
-      {cohortSize !== null && <text className="ck-cohort-size" textAnchor="end" x={left - 12} y={(y(cohort) ?? 0) + y.bandwidth() / 2 + 14}>{defaultFormat(cohortSize)} users</text>}
+      <text className="ck-cohort-label" textAnchor="end" x={left - 12} y={(y(cohort) ?? 0) + y.bandwidth() / 2 - (cohortSize !== null && WIDTH >= 480 ? 3 : -4)}>{cohort}</text>
+      {cohortSize !== null && WIDTH >= 480 && <text className="ck-cohort-size" textAnchor="end" x={left - 12} y={(y(cohort) ?? 0) + y.bandwidth() / 2 + 14}>{defaultFormat(cohortSize)} users</text>}
       {periods.map((period, periodIndex) => { const row = lookup.get(`${cohort}\u0000${period}`); const bx = x(period) ?? 0, by = y(cohort) ?? 0; if (!row) return <rect aria-hidden="true" className="ck-cohort-pending" fill="var(--ck-surface)" height={y.bandwidth()} key={period} rx={Math.min(theme.tokens.markRadius, 5)} stroke="var(--ck-border)" width={x.bandwidth()} x={bx} y={by} />; const value = numberValue(row[valueKey]); if (value === null) return null; const amount = Math.max(0, Math.min(1, value / maxValue)); const band = Math.min(4, Math.floor(amount * 5)); const mono = theme.familyId === "mono-editorial"; const color = mono ? theme.tokens.text : mixHex(start, end, amount); const cellProps = { ...props, getDatumLabel: props.getDatumLabel ?? (() => `${cohort} · ${period}: ${format(value)}${cohortSize !== null ? ` · ${defaultFormat(cohortSize)} users` : ""}`) }; const textColor = mono ? (band === 4 ? "var(--ck-background)" : "var(--ck-text)") : amount > .58 ? (theme.appearance === "dark" ? "#07101d" : "#ffffff") : "var(--ck-text)"; return <g key={period}>
         <rect {...markEvents(row, synthetic, value, `${cohort} · ${period}`, setTooltip, cellProps, color)} className={`ck-mark ck-cohort-cell${mono ? ` ck-mono-cohort-cell ck-cohort-band-${band}` : ""}`} fill={mono ? `url(#${id}-cohort-${band})` : color} height={y.bandwidth()} rx={Math.min(theme.tokens.markRadius, 5)} stroke={mono ? "var(--ck-border-strong)" : "var(--ck-mark-highlight)"} strokeOpacity={mono ? 1 : .24} style={{ "--ck-index": cohortIndex + periodIndex } as CSSProperties} width={x.bandwidth()} x={bx} y={by} />
         {showValues && <text aria-hidden="true" className="ck-cohort-value" fill={textColor} pointerEvents="none" textAnchor="middle" x={bx + x.bandwidth() / 2} y={by + y.bandwidth() / 2 + 4}>{format(value)}</text>}
@@ -371,15 +390,16 @@ export function CohortChart<T extends ChartDatum>(props: CohortChartProps<T>) {
 
 type TerrainPoint<T extends ChartDatum> = { row: T; x: number; z: number; value: number; height: number; label: string };
 
-function terrainProject(x: number, z: number, pointHeight: number, height: number) {
+function terrainProject(x: number, z: number, pointHeight: number, height: number, width: number) {
   const originY = height * .78;
   return {
-    x: WIDTH / 2 + (x - .5) * 530 + (z - .5) * 210,
+    x: width / 2 + ((x - .5) * 530 + (z - .5) * 210) * (width - 40) / 760,
     y: originY + (z - .5) * 104 - pointHeight * Math.min(190, height * .46) - (x - .5) * 18,
   };
 }
 
-export function TerrainChart<T extends ChartDatum>(props: TerrainChartProps<T>) {
+function TerrainChartContent<T extends ChartDatum>(props: TerrainChartProps<T>) {
+  const WIDTH = useChartWidth();
   const {
     data, xKey, zKey, valueKey, height = 420, density = "medium", smoothing = "medium",
     showWireframe = true, showPointCloud = true,
@@ -408,7 +428,7 @@ export function TerrainChart<T extends ChartDatum>(props: TerrainChartProps<T>) 
     controls.forEach((point) => { const dx = x - point.x, dz = z - point.z; const weight = Math.exp(-(dx * dx + dz * dz) / (radius * radius)); weighted += point.height * weight; total += weight; });
     const edge = Math.sin(Math.PI * x) * Math.sin(Math.PI * z);
     const terrainHeight = Math.max(0, Math.min(1, (total ? weighted / total : 0) * (.58 + edge * .54)));
-    return { x, z, height: terrainHeight, screen: terrainProject(x, z, terrainHeight, height) };
+    return { x, z, height: terrainHeight, screen: terrainProject(x, z, terrainHeight, height, WIDTH) };
   }));
   const projected = rows.flat().sort((a, b) => a.z - b.z);
   const nearest = (point: TerrainPoint<T>) => projected.reduce((best, candidate) => ((candidate.x - point.x) ** 2 + (candidate.z - point.z) ** 2 < (best.x - point.x) ** 2 + (best.z - point.z) ** 2 ? candidate : best));
@@ -427,7 +447,7 @@ export function TerrainChart<T extends ChartDatum>(props: TerrainChartProps<T>) 
   return <ChartFrame {...props} family="terrain" height={height} showLegend={false} tooltip={tooltip}><SvgCanvas id={id} height={height} label={props.ariaLabel ?? props.title ?? "3D terrain chart"} description={props.description ?? `A projected terrain surface with a peak at ${peak.label} and a low point at ${low.label}.`}>
     <defs><radialGradient id={`${id}-terrain-glow`}><stop offset="0%" stopColor="var(--ck-point-halo)" stopOpacity=".9" /><stop offset="100%" stopColor="var(--ck-point-halo)" stopOpacity="0" /></radialGradient></defs>
     <ellipse className="ck-terrain-glow" cx={WIDTH / 2} cy={height * .65} fill={`url(#${id}-terrain-glow)`} rx="310" ry="150" />
-    {[.2,.4,.6,.8].map((step) => { const a = terrainProject(0, step, 0, height), b = terrainProject(1, step, 0, height), c = terrainProject(step, 0, 0, height), d = terrainProject(step, 1, 0, height); return <g key={step}><line className="ck-terrain-floor" x1={a.x} x2={b.x} y1={a.y} y2={b.y} /><line className="ck-terrain-floor" x1={c.x} x2={d.x} y1={c.y} y2={d.y} /></g>; })}
+    {[.2,.4,.6,.8].map((step) => { const a = terrainProject(0, step, 0, height, WIDTH), b = terrainProject(1, step, 0, height, WIDTH), c = terrainProject(step, 0, 0, height, WIDTH), d = terrainProject(step, 1, 0, height, WIDTH); return <g key={step}><line className="ck-terrain-floor" x1={a.x} x2={b.x} y1={a.y} y2={b.y} /><line className="ck-terrain-floor" x1={c.x} x2={d.x} y1={c.y} y2={d.y} /></g>; })}
     {showWireframe && <g className="ck-terrain-wire">{rows.map((row, index) => index % 2 === 0 || index === rows.length - 1 ? <polyline key={`row-${index}`} points={row.map((point) => `${point.screen.x},${point.screen.y}`).join(" ")} /> : null)}{Array.from({ length: gridSize }, (_, index) => index % 3 === 0 || index === gridSize - 1 ? <polyline key={`column-${index}`} points={rows.map((row) => `${row[index].screen.x},${row[index].screen.y}`).join(" ")} /> : null)}</g>}
     {showPointCloud && <g>{projected.map((point, index) => <circle className="ck-terrain-point" cx={point.screen.x} cy={point.screen.y} fill={point.height > .72 ? "var(--ck-point-stroke)" : "var(--ck-text-muted)"} key={index} opacity={.24 + point.height * .66} r={1.1 + point.height * 1.25} />)}</g>}
     <g>{controls.map((point, index) => { const screen = nearest(point).screen; return <circle {...markEvents(point.row, synthetic, point.value, point.label, setTooltip, props, "var(--ck-point-stroke)")} className="ck-mark ck-terrain-control" cx={screen.x} cy={screen.y} fill="var(--ck-background)" key={index} r="4" stroke="var(--ck-point-stroke)" strokeWidth="1.5" style={{ "--ck-index": index } as CSSProperties} />; })}</g>
@@ -435,4 +455,40 @@ export function TerrainChart<T extends ChartDatum>(props: TerrainChartProps<T>) 
     {callout("LOW", low, lowScreen)}
     <text className="ck-terrain-axis" x="24" y={height - 18}>X {String(xKey)} · Y {String(valueKey)} · Z {String(zKey)}</text>
   </SvgCanvas></ChartFrame>;
+}
+
+export function BarChart<T extends ChartDatum>(props: BarChartProps<T>) {
+  return <ResponsiveChart><BarChartContent {...props} /></ResponsiveChart>;
+}
+
+export function LineChart<T extends ChartDatum>(props: LineChartProps<T>) {
+  return <ResponsiveChart><LineChartContent {...props} /></ResponsiveChart>;
+}
+
+export function AreaChart<T extends ChartDatum>(props: AreaChartProps<T>) {
+  return <ResponsiveChart><AreaChartContent {...props} /></ResponsiveChart>;
+}
+
+export function ScatterChart<T extends ChartDatum>(props: ScatterChartProps<T>) {
+  return <ResponsiveChart><ScatterChartContent {...props} /></ResponsiveChart>;
+}
+
+export function PieChart<T extends ChartDatum>(props: PieChartProps<T>) {
+  return <ResponsiveChart><PieChartContent {...props} /></ResponsiveChart>;
+}
+
+export function RadarChart<T extends ChartDatum>(props: RadarChartProps<T>) {
+  return <ResponsiveChart><RadarChartContent {...props} /></ResponsiveChart>;
+}
+
+export function HeatmapChart<T extends ChartDatum>(props: HeatmapChartProps<T>) {
+  return <ResponsiveChart><HeatmapChartContent {...props} /></ResponsiveChart>;
+}
+
+export function CohortChart<T extends ChartDatum>(props: CohortChartProps<T>) {
+  return <ResponsiveChart><CohortChartContent {...props} /></ResponsiveChart>;
+}
+
+export function TerrainChart<T extends ChartDatum>(props: TerrainChartProps<T>) {
+  return <ResponsiveChart><TerrainChartContent {...props} /></ResponsiveChart>;
 }

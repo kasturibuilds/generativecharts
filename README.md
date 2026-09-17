@@ -1,6 +1,6 @@
-# ChartKit
+# Generative Charts
 
-ChartKit is a React chart library and product website inspired by the ergonomics of Generative Loaders. It combines eighteen accessible SVG chart families with three polished themes and universal light and dark modes.
+Generative Charts is a React chart library and product website inspired by the ergonomics of Generative Loaders. It combines eighteen accessible SVG chart families with three polished themes and universal light and dark modes.
 
 The publishable package is in `packages/chartkit`; the gallery and documentation use its public workspace exports.
 
@@ -13,4 +13,4 @@ npm run dev
 
 Open `http://localhost:3000` for the gallery and `/docs` for documentation.
 
-The package name `@chartkit/internal` is a private placeholder and must be replaced before npm publication.
+The public npm package name is `generative-charts`. Publication is pending.

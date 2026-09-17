@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useState, useSyncExternalStore, type MouseEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { Brand } from "./brand";
+import { ThemeIcon } from "./theme-icon";
 import { useSearchParams } from "next/navigation";
 import {
   AreaChart,
@@ -26,7 +27,7 @@ import {
   themeList,
   type ChartAppearance,
   type ThemeId,
-} from "@chartkit/internal";
+} from "generative-charts";
 import { INSTALL_COMMAND, PACKAGE_NAME } from "../lib/package";
 
 type Family = "bar" | "line" | "area" | "scatter" | "pie" | "radar" | "radial" | "heatmap" | "cohort" | "funnel" | "sankey" | "treemap" | "waterfall" | "combo" | "histogram" | "boxplot" | "choropleth" | "terrain";
@@ -115,7 +116,7 @@ function isFamily(value: string | null): value is Family {
   return catalog.some((item) => item.id === value);
 }
 
-function CopyButton({ value, label = "Copy", stopPropagation = false }: { value: string; label?: string; stopPropagation?: boolean }) {
+function CopyButton({ value, label = "Copy", iconOnly = false, stopPropagation = false }: { value: string; label?: string; iconOnly?: boolean; stopPropagation?: boolean }) {
   const [copied, setCopied] = useState(false);
   async function copy(event: MouseEvent<HTMLButtonElement>) {
     if (stopPropagation) event.stopPropagation();
@@ -134,7 +135,11 @@ function CopyButton({ value, label = "Copy", stopPropagation = false }: { value:
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1400);
   }
-  return <button className="copy-button" onClick={copy} type="button">{copied ? "Copied" : label}</button>;
+  return <button aria-label={copied ? "Copied" : label} className={`copy-button${iconOnly ? " copy-button-icon" : ""}`} onClick={copy} title={copied ? "Copied" : label} type="button">
+    {iconOnly ? <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      {copied ? <path d="m5 12 4 4L19 6" /> : <><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h4" /></>}
+    </svg> : copied ? "Copied" : label}
+  </button>;
 }
 
 function chartCode(family: Family, variation: string, theme: ThemeId, appearance: ChartAppearance) {
@@ -165,11 +170,11 @@ function chartCode(family: Family, variation: string, theme: ThemeId, appearance
 
 function ChartPreview({ family, variation, theme, appearance, height = 270, showLegend = false, showTooltip = true, animate = true }: { family: Family; variation: string; theme: ThemeId; appearance: ChartAppearance; height?: number; showLegend?: boolean; showTooltip?: boolean; animate?: boolean }) {
   const context: Record<Family, { title: string; description: string }> = {
-    bar: { title: "Launch signal by segment", description: "Sample data styled through the ChartKit theme system." },
+    bar: { title: "Launch signal by segment", description: "Sample data styled through the Generative Charts theme system." },
     line: { title: "Revenue momentum", description: "Monthly recurring revenue continues to accelerate." },
     area: { title: "Revenue over time", description: "Cumulative growth across the first half of the year." },
     scatter: { title: "Growth efficiency", description: "Revenue performance relative to active users." },
-    pie: { title: "Launch signal by segment", description: "Sample data styled through the ChartKit theme system." },
+    pie: { title: "Launch signal by segment", description: "Sample data styled through the Generative Charts theme system." },
     radar: { title: "Product profile", description: "A balanced view of five experience qualities." },
     radial: { title: "Goal completion", description: "Progress toward this period’s operating goals." },
     heatmap: { title: "Weekly activity", description: "Engagement intensity by weekday and hour." },
@@ -203,9 +208,13 @@ function ChartPreview({ family, variation, theme, appearance, height = 270, show
   if (family === "boxplot") return <BoxPlotChart {...common} categoryKey="plan" data={boxData} valueKey="value" />;
   if (family === "choropleth") return <ChoroplethChart {...common} data={mapData} featureKey="name" features={mapFeatures} regionKey="region" valueKey="value" />;
   if (family === "terrain") return <TerrainChart {...common} data={terrainData} xKey="x" zKey="z" valueKey="elevation" showPointCloud showWireframe={variation !== "points"} valueFormatter={(value) => `${value}m`} />;
-  if (family === "cohort") return <CohortChart {...common} cohortKey="cohort" data={cohortData} height={420} periodKey="period" showValues sizeKey="users" valueFormatter={(value) => `${value}%`} valueKey="retained" />;
+  if (family === "cohort") return <CohortChart {...common} cohortKey="cohort" data={cohortData} periodKey="period" showValues sizeKey="users" valueFormatter={(value) => `${value}%`} valueKey="retained" />;
   return variation === "contributions" ? <HeatmapChart {...common} data={contributionData} xKey="week" yKey="day" valueKey="value" /> : <HeatmapChart {...common} data={heatData} xKey="time" yKey="day" valueKey="value" />;
 }
+
+const subscribeHydration = () => () => {};
+const clientHydrated = () => true;
+const serverHydrated = () => false;
 
 export function Gallery() {
   const params = useSearchParams();
@@ -215,30 +224,39 @@ export function Gallery() {
   const initialFamily = isFamily(requestedFamily) ? requestedFamily : "bar";
   const [selectedFamily, setSelectedFamily] = useState<Family>(initialFamily);
   const [theme, setTheme] = useState<ThemeId>(() => themeList.some((item) => item.id === requestedTheme) ? requestedTheme : "mono-editorial");
-  const [appearance, setAppearance] = useState<ChartAppearance>(() => {
-    if (requestedAppearance === "light" || requestedAppearance === "dark") return requestedAppearance;
-    if (typeof window !== "undefined" && localStorage.getItem("chartkit-site-theme") === "dark") return "dark";
-    return "light";
-  });
+  const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
+  const [appearanceChoice, setAppearance] = useState<ChartAppearance | null>(requestedAppearance === "light" || requestedAppearance === "dark" ? requestedAppearance : null);
+  const appearance: ChartAppearance = appearanceChoice ?? (hydrated && document.documentElement.dataset.siteTheme === "dark" ? "dark" : "light");
   const selectedTheme = themeList.find((item) => item.id === theme) ?? themeList[0];
   useEffect(() => {
+    if (!hydrated) return;
     document.documentElement.dataset.siteTheme = appearance;
-    localStorage.setItem("chartkit-site-theme", appearance);
+    document.documentElement.style.colorScheme = appearance;
+    try { localStorage.setItem("chartkit-site-theme", appearance); } catch { /* Storage can be disabled in private browsing. */ }
     const next = new URLSearchParams();
     next.set("theme", theme);
     next.set("mode", appearance);
     next.set("chart", selectedFamily);
     window.history.replaceState({}, "", `${window.location.pathname}?${next}`);
-  }, [appearance, selectedFamily, theme]);
+  }, [appearance, hydrated, selectedFamily, theme]);
 
   function selectChart(family: Family) {
     setSelectedFamily(family);
   }
 
+  function navigateTabs(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    const next = event.key === "ArrowRight" ? (index + 1) % catalog.length : event.key === "ArrowLeft" ? (index - 1 + catalog.length) % catalog.length : event.key === "Home" ? 0 : event.key === "End" ? catalog.length - 1 : null;
+    if (next === null) return;
+    event.preventDefault();
+    selectChart(catalog[next].id);
+    document.getElementById(`chart-tab-${catalog[next].id}`)?.focus();
+  }
+
   return <main id="top">
     <nav className="site-nav shell">
       <Brand />
-      <div className="nav-links"><Link href="/docs">Documentation</Link><button aria-label={`Switch to ${appearance === "light" ? "dark" : "light"} mode`} className="theme-toggle" onClick={() => setAppearance((mode) => mode === "light" ? "dark" : "light")} type="button"><span aria-hidden="true">{appearance === "light" ? "◐" : "◑"}</span></button></div>
+      <div className="nav-links"><a href="#charts">Charts</a><Link href="/docs">Docs</Link></div>
+      <div className="nav-actions"><button aria-label={`Switch to ${appearance === "light" ? "dark" : "light"} mode`} className="theme-toggle" onClick={() => setAppearance(appearance === "light" ? "dark" : "light")} type="button"><ThemeIcon appearance={appearance} /></button><Link className="nav-install nav-docs-mobile" href="/docs">Docs <span>↗</span></Link></div>
     </nav>
 
     <header className="catalog-hero shell">
@@ -251,7 +269,7 @@ export function Gallery() {
         <div className="family-navigation">
           <span className="control-label">Chart type</span>
           <div aria-label="Chart type" className="family-tabs" role="tablist">
-            {catalog.map((item) => <button aria-controls="chart-preview" aria-selected={selectedFamily === item.id} key={item.id} onClick={() => selectChart(item.id)} role="tab" type="button">{item.name}</button>)}
+            {catalog.map((item, index) => <button aria-controls="chart-preview" aria-selected={selectedFamily === item.id} id={`chart-tab-${item.id}`} tabIndex={selectedFamily === item.id ? 0 : -1} key={item.id} onClick={() => selectChart(item.id)} onKeyDown={(event) => navigateTabs(event, index)} role="tab" type="button">{item.name}</button>)}
           </div>
         </div>
         <div className="appearance-control">
@@ -269,9 +287,9 @@ export function Gallery() {
         <h2>{catalog.find((item) => item.id === selectedFamily)?.name} variations</h2>
       </div>
 
-      <div className={`variation-grid${variations[selectedFamily].length === 1 ? " variation-grid-single" : ""}`} id="chart-preview" role="tabpanel">
-        {variations[selectedFamily].map((item) => <article className="variation-example" key={item.id}>
-          <CopyButton label="Copy code" value={chartCode(selectedFamily, item.id, theme, appearance)} />
+      <div aria-labelledby={`chart-tab-${selectedFamily}`} className={`variation-grid${variations[selectedFamily].length === 1 ? " variation-grid-single" : ""}`} id="chart-preview" role="tabpanel">
+        {variations[selectedFamily].map((item) => <article className="variation-example" key={`${selectedFamily}-${item.id}`}>
+          <CopyButton iconOnly label="Copy code" value={chartCode(selectedFamily, item.id, theme, appearance)} />
           <ChartPreview appearance={appearance} family={selectedFamily} height={340} showLegend theme={theme} variation={item.id} />
         </article>)}
       </div>
@@ -284,7 +302,7 @@ export function Gallery() {
 
     <footer className="footer-editorial">
       <div className="footer-editorial-inner shell">
-        <div aria-label="ChartKit" className="footer-wordmark">ChartKit</div>
+        <div aria-label="Generative Charts" className="footer-wordmark"><span className="footer-wordmark-word">Generative</span><span className="footer-wordmark-word">Charts</span></div>
         <div className="footer-editorial-meta">
           <p>Created by Kasturi Khanke</p>
           <nav aria-label="Footer links"><Link href="/docs">Docs →</Link><a href="#top">Back to top ↑</a></nav>

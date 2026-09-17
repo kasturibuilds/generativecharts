@@ -1,8 +1,7 @@
 {
-  "name": "@chartkit/internal",
+  "name": "generative-charts",
   "version": "0.1.0",
   "description": "Polished, accessible React charts with expressive themes.",
-  "private": true,
   "type": "module",
   "sideEffects": ["**/*.css"],
   "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],

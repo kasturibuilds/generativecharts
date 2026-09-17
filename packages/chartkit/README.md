@@ -1,18 +1,18 @@
-# ChartKit
+# Generative Charts
 
 Polished, accessible React charts with eighteen useful chart families, three themes, and universal light and dark modes.
 
-> The package currently uses the private development name `@chartkit/internal`. Choose the final public npm name before publishing.
+> The package is being prepared for its first public release on npm.
 
 ## Install
 
 ```bash
-npm install @chartkit/internal
+npm install generative-charts
 ```
 
 ```tsx
-import { BarChart } from "@chartkit/internal";
-import "@chartkit/internal/styles.css";
+import { BarChart } from "generative-charts";
+import "generative-charts/styles.css";
 
 const data = [
   { month: "Jan", revenue: 42 },
@@ -71,4 +71,4 @@ npm test
 
 ## License
 
-MIT © Kasturi Khanke and ChartKit contributors.
+MIT © Kasturi Khanke and Generative Charts contributors.

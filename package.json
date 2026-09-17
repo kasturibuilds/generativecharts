@@ -1,24 +1,29 @@
 {
-  "name": "chartkit-workspace",
+  "name": "generative-charts-workspace",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "npm run build:package && next dev",
-    "build:package": "npm run build --workspace @chartkit/internal",
+    "start": "next start",
+    "build:package": "npm run build --workspace generative-charts",
     "build": "npm run build:package && next build",
-    "typecheck": "tsc --noEmit && npm run typecheck --workspace @chartkit/internal",
+    "build:site": "npm run build:package && CHARTKIT_STATIC_EXPORT=1 next build",
+    "start:site": "node scripts/serve-static.mjs",
+    "typecheck": "tsc --noEmit && npm run typecheck --workspace generative-charts",
     "lint": "eslint . --ignore-pattern packages/chartkit/dist --ignore-pattern .next",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test:consumers": "node scripts/test-consumers.mjs",
     "test": "npm run build:package && npm run typecheck && npm run test:unit && npm run build",
-    "pack:package": "npm_config_cache=/tmp/chartkit-npm-cache npm pack --workspace @chartkit/internal --dry-run"
+    "pack:package": "npm_config_cache=/tmp/chartkit-npm-cache npm pack --workspace generative-charts --dry-run"
   },
   "dependencies": {
-    "@chartkit/internal": "workspace:*",
-    "next": "^16.1.0",
+    "generative-charts": "workspace:*",
+    "next": "^16.3.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -32,12 +37,14 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.1.0",
     "eslint": "^9.39.0",
-    "eslint-config-next": "^16.1.0",
+    "eslint-config-next": "^16.3.3",
     "jsdom": "^27.0.0",
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.50.0",
     "vite": "^7.2.0",
     "vitest": "^4.0.0"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

@@ -6,7 +6,7 @@ import { AreaChart, BarChart, BoxPlotChart, ChoroplethChart, CohortChart, ComboC
 const rows = [{ label: "A", one: 12, two: 8, x: 1 }, { label: "B", one: 20, two: 14, x: 2 }, { label: "C", one: 16, two: 18, x: 3 }];
 const series = [{ dataKey: "one", label: "One" }, { dataKey: "two", label: "Two" }] as const;
 
-describe("ChartKit", () => {
+describe("Generative Charts", () => {
   it("renders all eighteen chart families", () => {
     const links = [{ source: "A", target: "B", value: 12 }, { source: "B", target: "C", value: 8 }];
     const features = [{ type: "Feature" as const, properties: { name: "A" }, geometry: { type: "Polygon" as const, coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]] as [number, number][][] } }];
@@ -193,6 +193,16 @@ describe("ChartKit", () => {
     const marks = [...container.querySelectorAll(".ck-ranked-bar")];
     expect(marks.length).toBe(rows.length);
     expect(marks.every((mark) => mark.getAttribute("height") === "24")).toBe(true);
+  });
+
+  it("adds directional motion hooks and honors the animation opt-out", () => {
+    const vertical = render(<BarChart data={rows} categoryKey="label" series={[series[0]]} />);
+    expect(vertical.container.querySelector(".ck-chart")).toHaveClass("ck-animate");
+    expect(vertical.container.querySelectorAll(".ck-bar-vertical")).toHaveLength(rows.length);
+
+    const horizontal = render(<BarChart animate={false} data={rows} categoryKey="label" series={[series[0]]} variant="horizontal" />);
+    expect(horizontal.container.querySelector(".ck-chart")).not.toHaveClass("ck-animate");
+    expect(horizontal.container.querySelectorAll(".ck-bar-horizontal")).toHaveLength(rows.length);
   });
 
   it("renders stable server markup", () => {

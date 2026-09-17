@@ -1,5 +1,8 @@
 node_modules
 .next
+.next-export
+out
+dist
 packages/chartkit/dist
 coverage
 playwright-report

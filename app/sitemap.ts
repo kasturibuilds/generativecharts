@@ -1,2 +1,4 @@
 import type { MetadataRoute } from "next";
-export default function sitemap(): MetadataRoute.Sitemap { return [{ url: "https://chartkit.dev", priority: 1 }, { url: "https://chartkit.dev/docs", priority: .8 }]; }
+import { SITE_URL } from "./lib/site";
+export const dynamic = "force-static";
+export default function sitemap(): MetadataRoute.Sitemap { return [{ url: SITE_URL, priority: 1 }, { url: `${SITE_URL}/docs/`, priority: .8 }]; }

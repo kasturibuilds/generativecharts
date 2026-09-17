@@ -1,4 +1,4 @@
-# ChartKit product backlog
+# Generative Charts product backlog
 
 Research notes are recorded here so future improvement runs can build on prior findings instead of rediscovering them. Priority reflects the current product direction.
 
@@ -25,7 +25,7 @@ Research notes are recorded here so future improvement runs can build on prior f
 | --- | --- | --- |
 | Sankey | Explains weighted flow through journeys and systems. | Existing; defer further polish |
 | Figma library | Helps designers compose with the same chart language before implementation. | Planned |
-| shadcn registry | Makes ChartKit installation and source ownership fit modern React workflows. | Planned |
+| shadcn registry | Makes Generative Charts installation and source ownership fit modern React workflows. | Planned |
 
 ## Completed research notes
 

@@ -18,7 +18,7 @@ test("catalog, themes, variations, code, and docs work", async ({ page }) => {
   await page.getByRole("button", { name: "Copy code" }).first().click();
   await expect(page.getByRole("button", { name: "Copied" }).first()).toBeVisible();
   await page.locator(".gallery-footer").getByRole("link", { name: "Docs →" }).click();
-  await expect(page.getByRole("heading", { name: /Make the data/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Install Generative Charts", exact: true })).toBeVisible();
 });
 
 test("shareable chart and theme state restores from the URL", async ({ page }) => {
@@ -29,17 +29,18 @@ test("shareable chart and theme state restores from the URL", async ({ page }) =
   await expect(page.locator(".variation-example")).toHaveCount(3);
 });
 
-test("only standalone chart variations use the full playground width", async ({ page }) => {
+test("standalone chart variations use a bounded preview width", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?chart=treemap&theme=mono-editorial&mode=light");
 
   const gridWidth = await page.locator(".variation-grid").evaluate((element) => element.getBoundingClientRect().width);
   const chartWidth = await page.locator(".variation-example").evaluate((element) => element.getBoundingClientRect().width);
 
-  expect(chartWidth).toBeGreaterThan(gridWidth * 0.98);
+  expect(chartWidth).toBeLessThan(gridWidth * 0.85);
+  expect(chartWidth).toBeLessThanOrEqual(960);
 
   await page.getByRole("tab", { name: "Pie", exact: true }).click();
   const multiChartWidth = await page.locator(".variation-example").first().evaluate((element) => element.getBoundingClientRect().width);
 
-  expect(multiChartWidth).toBeLessThan(gridWidth * 0.55);
+  expect(multiChartWidth).toBeLessThan(chartWidth);
 });

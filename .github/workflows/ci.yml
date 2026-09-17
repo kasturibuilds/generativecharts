@@ -16,3 +16,31 @@ jobs:
       - run: npm test
       - run: npm run test:consumers
       - run: npm run pack:package
+      - run: npm run build:site
+      - run: npx playwright install --with-deps chromium
+      - run: CHARTKIT_TEST_STATIC=1 npm run test:e2e -- tests/e2e/gallery.spec.ts tests/e2e/readiness.spec.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failures
+          path: test-results/
+          retention-days: 14
+  visual:
+    # Baselines are reviewed on macOS; Linux runs the structural and interaction audit above.
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npm run build:site
+      - run: CHARTKIT_TEST_STATIC=1 npm run test:e2e -- tests/e2e/visual.spec.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-failures
+          path: test-results/
+          retention-days: 14

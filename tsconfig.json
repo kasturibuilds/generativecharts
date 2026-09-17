@@ -37,6 +37,7 @@
   ],
   "exclude": [
     "node_modules",
+    ".automation-worktrees",
     "packages/chartkit/dist"
   ]
 }

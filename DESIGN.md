@@ -1,10 +1,10 @@
-# ChartKit Design Standard
+# Generative Charts Design Standard
 
 **Status: required.** This is the design contract for the package, gallery, documentation, and examples. A change is not finished because it compiles or resembles a screenshot. It is finished when it follows this document and passes the review checklist.
 
-This document is the visual contract for ChartKit. It exists to keep the package simple to use without allowing its charts to become generic.
+This document is the visual contract for Generative Charts. It exists to keep the package simple to use without allowing its charts to become generic.
 
-ChartKit should not look like the same SVG recolored three times. Every chart must have sound information design, deliberate composition, and a recognizable material treatment in each theme. The data API stays small; polish belongs in the defaults.
+Generative Charts should not look like the same SVG recolored three times. Every chart must have sound information design, deliberate composition, and a recognizable material treatment in each theme. The data API stays small; polish belongs in the defaults.
 
 ## The short version
 
@@ -16,7 +16,7 @@ When making a design decision, use these rules first:
 4. The chart is the content. Interface chrome must recede.
 5. Text must explain a choice, value, or action. Otherwise remove it.
 6. Theme changes material, not information hierarchy.
-7. Do not invent a new treatment when a canonical ChartKit treatment already exists.
+7. Do not invent a new treatment when a canonical Generative Charts treatment already exists.
 
 If a design needs several borders, backgrounds, radii, or shadows to feel organized, its hierarchy is not resolved yet.
 
@@ -82,13 +82,13 @@ If the answer to question 1 is vague, do not add the box. If question 2 or 3 is 
 
 ### Content restraint
 
-ChartKit should say less and show more.
+Generative Charts should say less and show more.
 
 - Prefer a clear noun or verb over product jargon.
 - Do not add explanatory copy when the label and visual already communicate the idea.
 - Keep headings short. Descriptions are optional, not structural filler.
 - Repeated source lines, signatures, watermarks, and brand labels are noise. Show them once where provenance or export context requires them.
-- Do not place a ChartKit watermark on every gallery card.
+- Do not place a Generative Charts watermark on every gallery card.
 - Controls use direct labels such as `Vertical`, `Grouped`, and `Dark`; supporting text is used only when it changes the choice.
 - Empty metadata slots collapse. They never leave decorative bands behind.
 
@@ -102,7 +102,7 @@ ChartKit should say less and show more.
 
 ## Product promise
 
-ChartKit gives a React developer a chart they can ship before they have a visualization designer on the team.
+Generative Charts gives a React developer a chart they can ship before they have a visualization designer on the team.
 
 A default chart must therefore be:
 
@@ -113,11 +113,11 @@ A default chart must therefore be:
 - accessible by pointer, keyboard, touch, and screen reader;
 - deterministic during server rendering and hydration.
 
-The package is not a chart-building DSL. Developers provide data, keys, series, and a few intentional choices. ChartKit owns layout, scale padding, label placement, mark treatment, interaction, and responsive behavior.
+The package is not a chart-building DSL. Developers provide data, keys, series, and a few intentional choices. Generative Charts owns layout, scale padding, label placement, mark treatment, interaction, and responsive behavior.
 
 ## What was missing
 
-The first ChartKit package pass established the correct component families and interaction model, but reduced themes primarily to palette, corner radius, and shadow changes. The original `dataviz` work had more layers:
+The first Generative Charts package pass established the correct component families and interaction model, but reduced themes primarily to palette, corner radius, and shadow changes. The original `dataviz` work had more layers:
 
 - chart titles and supporting information were composed as part of the figure;
 - plots had deliberate spacing and stronger baseline geometry;
@@ -130,7 +130,7 @@ Those qualities should return without bringing back the studio, recommendation e
 
 ## Design model
 
-Every ChartKit render has three layers.
+Every Generative Charts render has three layers.
 
 ### 1. Chart grammar
 
@@ -424,7 +424,7 @@ This standard distills the useful visual decisions from the earlier `dataviz` pr
 - `lib/data-studio/themes.ts` for material direction;
 - `registry/revenue-line/revenue-line-chart.tsx` for figure composition, layered strokes, gradient area, summary, endpoint emphasis, and latest-value annotation.
 
-Those files are references, not runtime dependencies. ChartKit should express the same care through a smaller, reusable component system.
+Those files are references, not runtime dependencies. Generative Charts should express the same care through a smaller, reusable component system.
 
 ### Porting rule
 

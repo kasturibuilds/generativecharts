@@ -1,21 +1,25 @@
 import { expect, test } from "@playwright/test";
 
-const families = ["bar", "line", "area", "scatter", "pie", "radar", "heatmap", "cohort", "terrain"];
+const families = ["bar", "line", "area", "scatter", "pie", "radar", "heatmap", "cohort", "radial", "funnel", "sankey", "treemap", "waterfall", "combo", "histogram", "boxplot", "choropleth", "terrain"];
 const themes = ["mono-editorial", "neon-instruments", "airform"];
 const modes = ["light", "dark"];
 
+for (const width of [390, 1280]) {
 for (const family of families) {
   for (const theme of themes) {
     for (const mode of modes) {
-      test(`${family} in ${theme} ${mode}`, async ({ page }) => {
+      test(`${family} in ${theme} ${mode} at ${width}`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
         await page.goto(`/?chart=${family}&theme=${theme}&mode=${mode}`);
         const chart = page.locator(".variation-example .ck-chart").first();
         await expect(chart).toBeVisible();
         await page.waitForTimeout(100);
-        await expect(chart).toHaveScreenshot(`${family}-${theme}-${mode}.png`, { animations: "disabled" });
+        await expect(chart).toHaveScreenshot(`${family}-${theme}-${mode}${width === 390 ? "-mobile" : ""}.png`, { animations: "disabled" });
       });
     }
   }
+}
+
 }
 
 for (const theme of themes) {

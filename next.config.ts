@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@chartkit/internal"],
+  ...(process.env.CHARTKIT_STATIC_EXPORT === "1" ? { output: "export" as const, distDir: "out", trailingSlash: true } : {}),
+  transpilePackages: ["generative-charts"],
   allowedDevOrigins: ["127.0.0.1"],
 };
 

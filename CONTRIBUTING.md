@@ -1,6 +1,6 @@
-# Contributing to ChartKit
+# Contributing to Generative Charts
 
-ChartKit is an npm workspace: the package lives in `packages/chartkit` and the Next.js gallery and documentation live in `app`.
+Generative Charts is an npm workspace: the package lives in `packages/chartkit` and the Next.js gallery and documentation live in `app`.
 
 Read [DESIGN.md](./DESIGN.md) before making visual or interaction changes. It is the acceptance contract for both the chart package and the product site.
 
