@@ -9,6 +9,7 @@ Checked 2026-09-17. The website is prepared for an owner-private ChatGPT Sites p
 - The packed library installs and server-renders under React 18 and React 19.
 - 45 browser checks pass against the static export, covering all 18 chart families, three themes, two appearances, and mobile/desktop widths.
 - Browser checks cover persisted appearance, explicit URL overrides, disabled storage, keyboard tabs, tooltip containment, copy code, navigation, and mobile documentation overflow.
+- Visual regression checks cover 222 reviewed desktop/mobile snapshots, with a 100-pixel tolerance for curved-edge rasterization.
 - Reviewed chart composition on desktop and mobile; plot wrappers stay transparent, figures own their boundary, and Mono Editorial bars remain outlines.
 - Dependency audit reports zero vulnerabilities after compatible updates.
 

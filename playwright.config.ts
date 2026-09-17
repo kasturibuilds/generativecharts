@@ -4,6 +4,8 @@ export default defineConfig({
   fullyParallel: true,
   workers: 2,
   forbidOnly: !!process.env.CI,
+  // Allow a small rasterization variance along curved SVG edges.
+  expect: { toHaveScreenshot: { maxDiffPixels: 100 } },
   snapshotPathTemplate: "{testDir}/{testFilePath}-snapshots/{arg}{ext}",
   use: {
     baseURL: "http://127.0.0.1:3100",
