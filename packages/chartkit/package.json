@@ -3,20 +3,37 @@
   "version": "0.1.0",
   "description": "Polished, accessible React charts with expressive themes.",
   "type": "module",
-  "sideEffects": ["**/*.css"],
-  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./styles.css": { "types": "./dist/styles.css.d.ts", "default": "./dist/styles.css" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": {
+      "types": "./dist/styles.css.d.ts",
+      "default": "./dist/styles.css"
+    }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && cp src/styles.css dist/styles.css && cp src/styles.css.d.ts dist/styles.css.d.ts",
+    "build": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json && cp src/styles.css dist/styles.css && cp src/styles.css.d.ts dist/styles.css.d.ts",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "prepack": "npm run build"
   },
-  "peerDependencies": { "react": ">=18", "react-dom": ">=18" },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
   "dependencies": {
     "d3-array": "^3.2.4",
     "d3-scale": "^4.0.2",
@@ -32,7 +49,21 @@
     "react-dom": "^19.2.0",
     "typescript": "^5.9.0"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "license": "MIT",
-  "publishConfig": { "access": "public", "provenance": true }
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "author": "Kasturi Khanke",
+  "keywords": [
+    "react",
+    "charts",
+    "data-visualization",
+    "typescript",
+    "svg",
+    "accessible"
+  ]
 }

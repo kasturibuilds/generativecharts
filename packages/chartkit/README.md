@@ -2,8 +2,6 @@
 
 Polished, accessible React charts with eighteen useful chart families, three themes, and universal light and dark modes.
 
-> The package is being prepared for its first public release on npm.
-
 ## Install
 
 ```bash
@@ -27,6 +25,17 @@ const data = [
   appearance="light"
 />;
 ```
+
+## Compatibility
+
+- React 18 and React 19, with React supplied by your application.
+- ESM imports with TypeScript declarations and a separate stylesheet export.
+- Tested with TypeScript 5.9 in both NodeNext and Bundler resolution modes.
+- Node.js 20 or newer for server rendering and tooling.
+- Client component directives are preserved for React Server Component frameworks.
+- Original TypeScript sources are included for source maps and editor navigation.
+
+Import the stylesheet once at the application root. The package does not inject global styles or bundle React. CommonJS `require()` is not a supported entry point.
 
 ## Components
 

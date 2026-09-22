@@ -19,7 +19,10 @@
     "test:e2e": "playwright test",
     "test:consumers": "node scripts/test-consumers.mjs",
     "test": "npm run build:package && npm run typecheck && npm run test:unit && npm run build",
-    "pack:package": "npm_config_cache=/tmp/chartkit-npm-cache npm pack --workspace generative-charts --dry-run"
+    "pack:package": "npm_config_cache=/tmp/chartkit-npm-cache npm pack --workspace generative-charts --dry-run",
+    "release:check": "npm run lint && npm run build:package && npm run typecheck && npm run test:unit && npm run test:consumers && npm run pack:package",
+    "pack:release": "npm pack --workspace generative-charts",
+    "publish:package": "npm run release:check && npm publish --workspace generative-charts"
   },
   "dependencies": {
     "generative-charts": "workspace:*",
