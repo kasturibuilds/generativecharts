@@ -4,6 +4,28 @@ export type ChartDatum = Record<string, unknown>;
 export type ThemeId = "mono-editorial" | "neon-instruments" | "airform";
 export type ChartAppearance = "light" | "dark";
 
+export type ChartDiagnosticCode = "invalid-number" | "missing-number" | "invalid-category" | "invalid-x";
+export type ChartDiagnostic = {
+  code: ChartDiagnosticCode;
+  chart: string;
+  message: string;
+  count: number;
+  dataKey?: string;
+  rowIndices: number[];
+};
+
+export type MissingValueStrategy = "gap" | "connect" | "zero" | "filter";
+export type CartesianScaleType = "auto" | "category" | "linear" | "time";
+export type CartesianScaleValue = string | number | Date;
+export type CartesianScaleOptions = {
+  type?: CartesianScaleType;
+  domain?: readonly [number | Date, number | Date];
+  tickCount?: number;
+  tickFormatter?: (value: CartesianScaleValue) => string;
+  locale?: string;
+  timeZone?: string;
+};
+
 export type ChartThemeTokens = {
   background: string;
   plotBackground: string;
@@ -80,12 +102,18 @@ export type CommonChartProps<TDatum extends ChartDatum = ChartDatum> = {
   ariaLabel?: string;
   getDatumLabel?: (datum: TDatum, seriesLabel: string, value: number) => string;
   onDatumClick?: (datum: TDatum, series: Series<TDatum>) => void;
+  onDiagnostic?: (diagnostic: ChartDiagnostic) => void;
 };
 
 export type CartesianChartProps<TDatum extends ChartDatum = ChartDatum> =
   CommonChartProps<TDatum> & {
     xKey: keyof TDatum & string;
     series: Series<TDatum>[];
+    xScale?: CartesianScaleOptions;
+    missingValueStrategy?: MissingValueStrategy;
+    activeIndex?: number | null;
+    defaultActiveIndex?: number;
+    onActiveIndexChange?: (index: number | null) => void;
   };
 
 export type BarChartProps<TDatum extends ChartDatum = ChartDatum> =
@@ -94,6 +122,7 @@ export type BarChartProps<TDatum extends ChartDatum = ChartDatum> =
     series: Series<TDatum>[];
     variant?: "vertical" | "horizontal";
     layout?: "grouped" | "stacked";
+    missingValueStrategy?: "filter" | "zero";
   };
 
 export type LineChartProps<TDatum extends ChartDatum = ChartDatum> =
@@ -127,6 +156,7 @@ export type RadarChartProps<TDatum extends ChartDatum = ChartDatum> =
   CommonChartProps<TDatum> & {
     categoryKey: keyof TDatum & string;
     series: Series<TDatum>[];
+    missingValueStrategy?: "filter" | "zero";
   };
 
 export type HeatmapChartProps<TDatum extends ChartDatum = ChartDatum> =

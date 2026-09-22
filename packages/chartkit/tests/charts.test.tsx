@@ -1,7 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { AreaChart, BarChart, BoxPlotChart, ChoroplethChart, CohortChart, ComboChart, createTheme, FunnelChart, HeatmapChart, HistogramChart, LineChart, PieChart, RadarChart, RadialChart, SankeyChart, ScatterChart, TerrainChart, TreemapChart, WaterfallChart } from "../src/index";
+import { AreaChart, BarChart, BoxPlotChart, chartLayoutMode, ChoroplethChart, CohortChart, ComboChart, createTheme, FunnelChart, HeatmapChart, HistogramChart, LineChart, PieChart, RadarChart, RadialChart, SankeyChart, ScatterChart, TerrainChart, TreemapChart, WaterfallChart } from "../src/index";
 
 const rows = [{ label: "A", one: 12, two: 8, x: 1 }, { label: "B", one: 20, two: 14, x: 2 }, { label: "C", one: 16, two: 18, x: 3 }];
 const series = [{ dataKey: "one", label: "One" }, { dataKey: "two", label: "Two" }] as const;
@@ -208,5 +208,67 @@ describe("Generative Charts", () => {
   it("renders stable server markup", () => {
     const html = renderToString(<BarChart data={rows} categoryKey="label" series={[...series]} animate={false} />);
     expect(html).toContain("role=\"img\""); expect(html).toContain("ck-chart");
+  });
+
+  it("keeps missing values out of marks unless zero is explicitly requested", () => {
+    const data = [{ label: "A", one: 8 }, { label: "B", one: null }, { label: "C", one: 12 }];
+    const omitted = render(<BarChart data={data} categoryKey="label" series={[series[0]]} />);
+    expect(omitted.container.querySelectorAll(".ck-bar-mark")).toHaveLength(2);
+    omitted.unmount();
+    const zeroed = render(<BarChart data={data} categoryKey="label" missingValueStrategy="zero" series={[series[0]]} />);
+    expect(zeroed.container.querySelectorAll(".ck-bar-mark")).toHaveLength(3);
+  });
+
+  it("renders missing line values as gaps and can deliberately connect them", () => {
+    const data = [{ label: "A", one: 8 }, { label: "B", one: null }, { label: "C", one: 12 }];
+    const gapped = render(<LineChart data={data} curve="linear" xKey="label" series={[series[0]]} />);
+    const gapPath = gapped.container.querySelector(".ck-line-trace")?.getAttribute("d") ?? "";
+    expect((gapPath.match(/M/g) ?? [])).toHaveLength(2);
+    expect(gapped.container.querySelectorAll(".ck-point")).toHaveLength(2);
+    gapped.unmount();
+    const connected = render(<LineChart data={data} curve="linear" missingValueStrategy="connect" xKey="label" series={[series[0]]} />);
+    const connectedPath = connected.container.querySelector(".ck-line-trace")?.getAttribute("d") ?? "";
+    expect((connectedPath.match(/M/g) ?? [])).toHaveLength(1);
+  });
+
+  it("preserves irregular numeric x spacing", () => {
+    const data = [{ x: 0, one: 8 }, { x: 1, one: 10 }, { x: 10, one: 12 }];
+    const { container } = render(<LineChart data={data} xKey="x" xScale={{ type: "linear" }} series={[series[0]]} />);
+    const positions = [...container.querySelectorAll(".ck-point")].map((point) => Number(point.getAttribute("cx")));
+    expect(positions[1] - positions[0]).toBeLessThan((positions[2] - positions[1]) / 4);
+  });
+
+  it("formats temporal x-axis ticks deterministically", () => {
+    const data = [{ when: "2026-01-01", one: 8 }, { when: "2026-03-01", one: 12 }];
+    const { container } = render(<LineChart data={data} xKey="when" xScale={{ type: "time", tickCount: 3, timeZone: "UTC" }} series={[series[0]]} />);
+    expect(container.textContent).toMatch(/Jan|Feb|Mar/);
+  });
+
+  it("exposes a shared comparison tooltip with roving keyboard focus", () => {
+    const onActiveIndexChange = vi.fn();
+    const { container } = render(<LineChart data={rows} onActiveIndexChange={onActiveIndexChange} xKey="label" series={[...series]} />);
+    const targets = [...container.querySelectorAll<SVGRectElement>(".ck-comparison-target")];
+    expect(targets.map((target) => target.tabIndex)).toEqual([0, -1, -1]);
+    fireEvent.focus(targets[0]);
+    expect(screen.getByRole("status")).toHaveTextContent("One");
+    expect(screen.getByRole("status")).toHaveTextContent("Two");
+    fireEvent.keyDown(targets[0], { key: "ArrowRight" });
+    expect(onActiveIndexChange).toHaveBeenLastCalledWith(1);
+  });
+
+  it("reports structured diagnostics for invalid values and x positions", async () => {
+    const onDiagnostic = vi.fn(); const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    render(<LineChart data={[{ x: 0, one: 8 }, { x: "bad", one: Number.NaN }, { x: 2, one: null }]} onDiagnostic={onDiagnostic} xKey="x" xScale={{ type: "linear" }} series={[series[0]]} />);
+    await waitFor(() => expect(onDiagnostic).toHaveBeenCalled());
+    expect(onDiagnostic.mock.calls.map(([diagnostic]) => diagnostic.code)).toEqual(expect.arrayContaining(["invalid-number", "missing-number", "invalid-x"]));
+    warning.mockRestore();
+  });
+
+  it("uses container-width layout modes and high-contrast dark tokens", () => {
+    expect([chartLayoutMode(320), chartLayoutMode(600), chartLayoutMode(900)]).toEqual(["compact", "standard", "wide"]);
+    const { container } = render(<LineChart appearance="dark" data={rows} theme="mono-editorial" xKey="label" series={[series[0]]} />);
+    const chart = container.querySelector<HTMLElement>(".ck-chart");
+    expect(chart?.style.getPropertyValue("--ck-background")).toBe("#000000");
+    expect(chart?.style.getPropertyValue("--ck-text")).toBe("#ffffff");
   });
 });

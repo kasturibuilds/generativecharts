@@ -7,8 +7,11 @@ Research notes are recorded here so future improvement runs can build on prior f
 | Opportunity | Why it is useful | Status |
 | --- | --- | --- |
 | Cohort retention chart | Shows return behavior by entry cohort without requiring product teams to assemble a heatmap manually. | Completed |
-| Dark theme overhaul | Raises contrast, material quality, and consistency across every family. | Next |
-| Better comparison tooltips | Makes multi-series and period-over-period decisions faster without scanning legends. | Planned |
+| Explicit missing-data semantics and development diagnostics | Prevents missing or malformed measurements from silently becoming invented zeroes. | Implemented on `codex/now-foundations`; awaiting review |
+| Temporal and numeric Cartesian scales | Preserves truthful spacing for irregular numeric and time observations. | Implemented on `codex/now-foundations`; awaiting review |
+| Better comparison tooltips and roving keyboard focus | Makes multi-series and period-over-period decisions faster without scanning legends or tabbing every mark. | Implemented on `codex/now-foundations`; awaiting review |
+| Container-aware responsive chart grammar | Reflows density, ticks, labels, and figure metadata from the measured chart container. | Implemented on `codex/now-foundations`; awaiting review |
+| Dark theme overhaul | Raises contrast, material quality, focus visibility, and consistency across every family. | Implemented on `codex/now-foundations`; awaiting review |
 
 ## SOON
 
@@ -31,3 +34,4 @@ Research notes are recorded here so future improvement runs can build on prior f
 
 - Signed grouped and stacked bars follow a shared zero baseline and accumulate positive and negative stacks independently.
 - Retention values are modeled by entry cohort and elapsed period; recent incomplete periods remain distinct from zero retention.
+- The five foundational NOW priorities are implemented together on `codex/now-foundations`, including public API documentation and focused regression coverage. Visual review and integration into `main` remain explicit review steps.

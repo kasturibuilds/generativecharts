@@ -80,14 +80,14 @@ test("edge tooltips fit the chart and dismiss with Escape", async ({ page }) => 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/?chart=line&theme=airform&mode=dark");
   const chart = page.locator(".ck-chart").first();
-  const mark = chart.locator(".ck-mark[role=button]").last();
-  await mark.focus();
+  const target = chart.locator(".ck-comparison-target").last();
+  await target.focus();
   await expect(chart.getByRole("status")).toBeVisible();
   const tip = await chart.getByRole("status").boundingBox();
   const frame = await chart.boundingBox();
   expect(tip!.x).toBeGreaterThanOrEqual(frame!.x);
   expect(tip!.x + tip!.width).toBeLessThanOrEqual(frame!.x + frame!.width);
-  await mark.press("Escape");
+  await target.press("Escape");
   await expect(chart.getByRole("status")).toHaveCount(0);
 });
 

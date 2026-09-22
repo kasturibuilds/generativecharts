@@ -60,13 +60,56 @@ Import the stylesheet once at the application root. The package does not inject 
 
 Bar charts accept signed values in grouped and stacked layouts. Positive and negative stacks accumulate independently from the zero baseline.
 
+## Missing values and diagnostics
+
+ChartKit never turns a missing measurement into zero unless you explicitly ask it to. Bars omit missing marks, line and area charts break their paths, radar charts leave incomplete profiles open, and matrix charts render a distinct missing cell.
+
+Use `missingValueStrategy="connect"` to bridge line/area gaps or `missingValueStrategy="zero"` to make zero imputation explicit. Development builds warn about missing, malformed, and non-finite numeric values. Use `onDiagnostic` when you also need structured observability:
+
+```tsx
+<LineChart
+  data={data}
+  xKey="timestamp"
+  series={series}
+  onDiagnostic={(diagnostic) => reportChartIssue(diagnostic)}
+/>
+```
+
+## Cartesian scales
+
+Line, area, scatter, and combo charts support categorical, linear, and temporal x-axes. Numbers are inferred as linear and `Date` objects as temporal; strings remain categorical unless a time scale is explicit.
+
+```tsx
+<LineChart
+  data={data}
+  xKey="timestamp"
+  series={series}
+  xScale={{
+    type: "time",
+    timeZone: "UTC",
+    tickCount: 5,
+    tickFormatter: (value) => value instanceof Date ? value.toISOString().slice(0, 10) : String(value),
+  }}
+/>
+```
+
+Set `domain` for a stable numeric or temporal comparison range. Time ticks default to UTC formatting so server and client output agree.
+
+## Comparison interaction
+
+Line, area, and combo charts compare every visible series at one x position. Pointer and touch tracking choose the nearest position. Keyboard users enter through one roving tab stop, move with Left/Right, switch the active series with Up/Down, and activate it with Enter or Space. `activeIndex`, `defaultActiveIndex`, and `onActiveIndexChange` support controlled coordination across charts.
+
 ## Themes
 
 Use `mono-editorial`, `neon-instruments`, or `airform`, then set `appearance` to `light` or `dark`. Import `createTheme` to create typed overrides for both modes.
 
+Dark modes use independently reviewed text, grid, focus, tooltip, and sequential-scale tokens; they are not automatic inversions of the light palettes.
+
 ## Accessibility
 
-Chart marks expose keyboard tooltips and Enter/Space activation. SVG titles and descriptions remain stable during server rendering. Legends are real pressed-state buttons, empty data is announced, and animations respect reduced-motion preferences.
+Chart marks expose keyboard tooltips and Enter/Space activation. Shared Cartesian comparisons use roving focus instead of adding every point to the page tab order. SVG titles and descriptions remain stable during server rendering. Legends are real pressed-state buttons, empty data is announced, and animations respect reduced-motion preferences.
+
+Every chart measures its plot container. Compact, standard, and wide layout modes adjust tick density, label wrapping, figure spacing, legends, and source treatment without relying on viewport media queries.
 
 ## Development
 
