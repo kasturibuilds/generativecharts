@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: "Generative Charts — Charts with a point of view", template: "%s · Generative Charts" },
   description: "Polished, accessible React charts with eighteen chart families, three themes, and universal light and dark modes.",
-  openGraph: { title: "Generative Charts", description: "Charts with a point of view.", type: "website", images: ["/opengraph-image"] },
-  twitter: { card: "summary_large_image", title: "Generative Charts", description: "Charts with a point of view.", images: ["/opengraph-image"] },
+  openGraph: { title: "Generative Charts", siteName: "Generative Charts", description: "Charts with a point of view.", type: "website", images: [{ url: "/social-card.png", width: 1200, height: 630, type: "image/png", alt: "Generative Charts — 18 React chart families, 3 expressive themes." }] },
+  twitter: { card: "summary_large_image", title: "Generative Charts", description: "Charts with a point of view.", images: [{ url: "/social-card.png", alt: "Generative Charts — 18 React chart families, 3 expressive themes." }] },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -11,6 +11,10 @@
   --site-shadow: 0 22px 70px rgba(28, 27, 23, 0.12);
 }
 
+html:not([data-site-theme="dark"]):has(main[data-chart-theme="mono-editorial"]) {
+  --site-bg: #f7f7f2;
+}
+
 html[data-site-theme="dark"] {
   --site-bg: #0d0e10;
   --site-panel: #151619;
@@ -82,8 +86,6 @@ button, select { font: inherit; }
 .family-tabs button { background: transparent; border: 0; border-radius: 9px; color: var(--site-muted); cursor: pointer; flex: 0 0 auto; font-size: 13px; font-weight: 680; padding: 10px 13px; position: relative; }
 .family-tabs button:hover { color: var(--site-text); }
 .family-tabs button[aria-selected="true"] { background: var(--site-soft); color: var(--site-text); }
-.gallery-heading { align-items: end; display: flex; gap: 24px; justify-content: space-between; padding: 34px 2px 14px; }
-.gallery-heading h2 { font-size: 20px; letter-spacing: -.035em; margin: 0; }
 .appearance-control { align-items: center; border-left: 1px solid var(--site-line); display: flex; flex: 0 0 auto; gap: 10px; padding-left: 18px; }
 .appearance-control .control-label { margin: 0; }
 .theme-select-shell { align-items: center; background: var(--site-soft); border: 1px solid transparent; border-radius: 7px; display: flex; min-height: 30px; padding-left: 9px; }
@@ -92,10 +94,12 @@ button, select { font: inherit; }
 .theme-select-shell select { appearance: none; background: transparent; border: 0; color: var(--site-text); cursor: pointer; font-size: 12px; font-weight: 680; min-width: 132px; outline: 0; padding: 6px 28px 6px 8px; }
 .theme-select-shell { position: relative; }
 .theme-select-shell::after { color: var(--site-muted); content: "⌄"; font-size: 12px; pointer-events: none; position: absolute; right: 9px; top: 6px; }
-.variation-grid { display: grid; gap: 36px 22px; grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
+.variation-grid { display: grid; gap: 36px 22px; grid-auto-rows: 1fr; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 28px; min-width: 0; }
 .variation-grid-single { grid-template-columns: minmax(0, 960px); justify-content: center; }
-.variation-example { min-width: 0; position: relative; }
-.variation-example .ck-chart { box-shadow: none; }
+.variation-example { display: flex; min-width: 0; position: relative; }
+.variation-example > .ck-responsive { display: flex; }
+.variation-example .ck-chart { box-shadow: none; display: flex; flex-direction: column; }
+.variation-example .ck-legend { margin-top: auto; }
 .variation-example > .copy-button { position: absolute; right: 18px; top: 18px; z-index: 4; }
 .variation-example:has(.ck-chart[data-theme="airform-light"]) > .copy-button { background: rgba(240, 249, 255, .8); border-color: rgba(255, 255, 255, .9); color: #123b68; }
 .variation-example:has(.ck-chart[data-theme="airform-light"]) > .copy-button:hover { background: #fff; border-color: #9ac9ed; }
@@ -103,8 +107,6 @@ button, select { font: inherit; }
 .variation-example:has(.ck-chart[data-theme="airform-dark"]) > .copy-button:hover { background: #285585; border-color: #9ac9ed; }
 .variation-example .ck-header { padding-right: 64px; }
 .variation-example .ck-figure-label { font-size: 14px; letter-spacing: -.01em; text-transform: none; }
-.gallery-footer { color: var(--site-muted); display: flex; font-size: 12px; font-weight: 700; justify-content: flex-end; padding: 14px 2px 0; }
-.gallery-footer a:hover { color: var(--site-text); }
 
 .text-button { background: transparent; border: 0; color: inherit; cursor: pointer; font: inherit; padding: 4px 0; }
 .text-button:hover { color: var(--site-text); }
@@ -165,7 +167,6 @@ button, select { font: inherit; }
   .family-navigation > .control-label { padding: 2px 0 8px; }
   .family-tabs { margin-right: -17px; padding-right: 17px; }
   .playground { padding-bottom: 40px; }
-  .gallery-heading { padding-top: 26px; }
   .variation-grid { gap: 26px; }
   .docs-card-grid { grid-template-columns: 1fr; }
   .prop-row { grid-template-columns: 1fr; }
@@ -195,11 +196,12 @@ button, select { font: inherit; }
   .nav-actions { gap: 6px; }
   .theme-toggle { height: 36px; width: 36px; }
   .nav-install { align-items: center; display: flex; height: 36px; padding: 0 10px; white-space: nowrap; }
-  .catalog-hero { padding: 46px 12px 40px; }
-  .catalog-hero h1 { font-size: 24px; }
-  .install-pill { gap: 10px; height: 52px; justify-content: space-between; margin-top: 18px; padding-left: 13px; width: 100%; }
-  .install-pill code { font-size: 12px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .install-pill .copy-button { min-width: 68px; }
+  .catalog-hero { align-items: stretch; padding: 40px 17px 36px; text-align: left; }
+  .catalog-hero h1 { font-size: 32px; line-height: 1.15; }
+  .install-pill { border-radius: 10px; box-shadow: none; gap: 8px; height: auto; min-height: 56px; justify-content: space-between; margin-top: 24px; padding: 5px 5px 5px 12px; width: 100%; }
+  .install-pill code { font-size: 12px; line-height: 1.6; min-width: 0; overflow-wrap: anywhere; white-space: normal; }
+  .install-pill .copy-button { background: var(--site-soft); color: var(--site-text); flex: 0 0 auto; height: 44px; min-width: 52px; padding: 0 8px; }
+  .install-pill .copy-button:hover { background: var(--site-line); }
   .footer-editorial-meta { gap: 18px; grid-template-columns: 1fr; }
   .footer-editorial-meta nav { justify-content: space-between; justify-self: start; width: 100%; }
 }

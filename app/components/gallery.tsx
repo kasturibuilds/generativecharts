@@ -252,7 +252,7 @@ export function Gallery() {
     document.getElementById(`chart-tab-${catalog[next].id}`)?.focus();
   }
 
-  return <main id="top">
+  return <main data-chart-theme={theme} id="top">
     <nav className="site-nav shell">
       <Brand />
       <div className="nav-links"><a href="#charts">Charts</a><Link href="/docs">Docs</Link></div>
@@ -283,19 +283,11 @@ export function Gallery() {
         </div>
       </div>
 
-      <div className="gallery-heading">
-        <h2>{catalog.find((item) => item.id === selectedFamily)?.name} variations</h2>
-      </div>
-
       <div aria-labelledby={`chart-tab-${selectedFamily}`} className={`variation-grid${variations[selectedFamily].length === 1 ? " variation-grid-single" : ""}`} id="chart-preview" role="tabpanel">
         {variations[selectedFamily].map((item) => <article className="variation-example" key={`${selectedFamily}-${item.id}`}>
           <CopyButton iconOnly label="Copy code" value={chartCode(selectedFamily, item.id, theme, appearance)} />
           <ChartPreview appearance={appearance} family={selectedFamily} height={340} showLegend theme={theme} variation={item.id} />
         </article>)}
-      </div>
-
-      <div className="gallery-footer">
-        <Link href={`/docs#${selectedFamily}`}>Docs →</Link>
       </div>
 
     </section>

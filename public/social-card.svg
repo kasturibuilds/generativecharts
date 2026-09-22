@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f7f6f2"/>
+  <g transform="translate(60 42) scale(2.4)" fill="#161616">
+    <circle cx="5" cy="19" r="2.15"/><circle cx="9.5" cy="13.5" r="2.15"/><circle cx="14" cy="16.5" r="2.15"/><circle cx="19" cy="8.5" r="2.15"/><circle cx="23.25" cy="11.5" r="2.15"/>
+  </g>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#161616">
+    <text x="1140" y="86" text-anchor="end" font-size="23">generativecharts.com</text>
+    <text x="64" y="198" font-size="86" font-weight="700" letter-spacing="-4">Generative Charts</text>
+    <text x="68" y="252" font-size="30">Charts with a point of view.</text>
+  </g>
+  <g transform="translate(68 308)" fill="none" stroke="#161616" stroke-width="2.5">
+    <path d="M0 184H298" stroke="#b9b8b3" stroke-width="1"/>
+    <rect x="8" y="105" width="42" height="79"/><rect x="66" y="64" width="42" height="120"/><rect x="124" y="87" width="42" height="97"/><rect x="182" y="21" width="42" height="163"/><rect x="240" y="45" width="42" height="139"/>
+  </g>
+  <g transform="translate(438 308)">
+    <path d="M0 184H298M0 122H298M0 60H298" fill="none" stroke="#deddd8"/>
+    <path d="M4 159C33 159 33 96 62 108S107 150 132 108S169 127 190 76S227 99 248 47S275 37 294 16" fill="none" stroke="#df2862" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="294" cy="16" r="7" fill="#df2862"/>
+  </g>
+  <g transform="translate(959 399) rotate(-90)" fill="none" stroke-width="29">
+    <circle r="82" stroke="#dfE7f1"/>
+    <circle r="82" stroke="#2459e0" stroke-dasharray="274 516"/>
+    <circle r="82" stroke="#719ded" stroke-dasharray="132 516" stroke-dashoffset="-283"/>
+  </g>
+  <path d="M68 547H1132" stroke="#b9b8b3"/>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#454545" font-size="22">
+    <text x="68" y="587">18 chart families · 3 themes · Light + dark</text>
+    <text x="1132" y="587" text-anchor="end">Built for React.</text>
+  </g>
+</svg>

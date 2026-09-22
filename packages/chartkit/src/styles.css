@@ -158,7 +158,6 @@
 .ck-chart[data-theme^="neon-instruments"] .ck-extruded-wall { filter: none; }
 .ck-chart[data-theme^="airform"] .ck-extruded-shadow { fill: rgba(20,64,112,.18); filter: blur(12px); }
 
-.ck-end-label line { stroke: var(--ck-border-strong); }
 .ck-end-label rect { fill: var(--ck-surface); stroke: var(--ck-border-strong); }
 .ck-end-label text { fill: var(--ck-text); font-size: 20px; font-weight: 750; }
 .ck-end-label .ck-end-label-kicker { fill: var(--ck-text-muted); font-size: 15px; letter-spacing: .08em; }
