@@ -264,27 +264,21 @@ export function Gallery() {
     </header>
 
     <section aria-label="Chart playground" className="playground shell" id="charts">
-      <div aria-label="Chart theme" className="theme-picker" role="group">
-        {themeList.map((item) => <button aria-label={item.name} aria-pressed={theme === item.id} className="theme-option" data-preview-theme={`${item.id}-${appearance}`} key={item.id} onClick={() => setTheme(item.id as ThemeId)} type="button">
-          <svg aria-hidden="true" className="theme-miniature" viewBox="0 0 160 76">
-            {item.id === "airform" && <defs><linearGradient id="theme-airform-bar" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#fff" /><stop offset=".45" stopColor="#cae9ff" /><stop offset="1" stopColor="#6faff2" /></linearGradient></defs>}
-            <path className="theme-mini-grid" d="M6 66H154M6 40H154M6 14H154" />
-            <rect className="theme-mini-bar" x="10" y="38" width="19" height="28" rx={item.id === "mono-editorial" ? 0 : 7} />
-            <rect className="theme-mini-bar" x="39" y="23" width="19" height="43" rx={item.id === "mono-editorial" ? 0 : 7} />
-            <rect className="theme-mini-bar" x="68" y="9" width="19" height="57" rx={item.id === "mono-editorial" ? 0 : 7} />
-            <path className="theme-mini-line" d="M105 53C111 53 111 33 120 36S132 48 137 25S146 17 151 9" />
-            <circle className="theme-mini-point" cx="151" cy="9" r="3" />
-          </svg>
-          <span className="theme-option-copy"><span className="theme-option-name">{item.name}</span><span className="theme-option-description">{item.id === "mono-editorial" ? "Crisp outlines" : item.id === "neon-instruments" ? "Vivid signals" : "Soft dimension"}</span></span>
-          <span aria-hidden="true" className="theme-option-check">{theme === item.id ? "✓" : ""}</span>
-        </button>)}
-      </div>
       <div className="gallery-toolbar">
         <div className="family-navigation">
-          <span className="control-label">Chart type</span>
+          <span className="control-label">Chart</span>
           <div aria-label="Chart type" className="family-tabs" role="tablist">
             {catalog.map((item, index) => <button aria-controls="chart-preview" aria-selected={selectedFamily === item.id} id={`chart-tab-${item.id}`} tabIndex={selectedFamily === item.id ? 0 : -1} key={item.id} onClick={() => selectChart(item.id)} onKeyDown={(event) => navigateTabs(event, index)} role="tab" type="button">{item.name}</button>)}
           </div>
+        </div>
+        <div className="theme-navigation">
+          <span className="control-label">Theme</span>
+          <div aria-label="Chart theme" className="theme-picker" role="group">
+        {themeList.map((item) => <button aria-label={item.name} aria-pressed={theme === item.id} className="theme-option" data-preview-theme={`${item.id}-${appearance}`} key={item.id} onClick={() => setTheme(item.id as ThemeId)} type="button">
+          <span aria-hidden="true" className="theme-material" />
+          <span className="theme-option-copy"><span className="theme-option-name">{item.name}</span></span>
+        </button>)}
+      </div>
         </div>
       </div>
 
