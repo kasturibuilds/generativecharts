@@ -5,6 +5,7 @@
   --site-muted: #696969;
   --site-line: #e2e2e2;
   --site-soft: #f5f6f8;
+  --site-selection: #dedbd2;
   --site-caption: #9a9a9a;
   --site-accent: #ef5b36;
   --site-code: #171715;
@@ -22,6 +23,7 @@ html[data-site-theme="dark"] {
   --site-muted: #aaaeb6;
   --site-line: #2c2e33;
   --site-soft: #202226;
+  --site-selection: #34363b;
   --site-caption: #858a94;
   --site-accent: #ff7650;
   --site-code: #080807;
@@ -85,10 +87,10 @@ button, select { font: inherit; }
 .family-tabs::-webkit-scrollbar { display: none; }
 .family-tabs button { background: transparent; border: 0; border-radius: 9px; color: var(--site-muted); cursor: pointer; flex: 0 0 auto; font-size: 13px; font-weight: 550; padding: 9px 8px; position: relative; }
 .family-tabs button:hover { color: var(--site-text); }
-.family-tabs button[aria-selected="true"] { background: var(--site-text); color: var(--site-bg); }
+.family-tabs button[aria-selected="true"] { background: var(--site-selection); color: var(--site-text); }
 .theme-picker { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
 .theme-option { align-items: center; background: transparent; border: 0; border-radius: 7px; color: var(--site-muted); cursor: pointer; display: flex; gap: 8px; min-width: 0; padding: 8px 10px; text-align: left; }
-.theme-option[aria-pressed="true"] { background: var(--site-text); color: var(--site-bg); }
+.theme-option[aria-pressed="true"] { background: var(--site-selection); color: var(--site-text); }
 .theme-option:not([aria-pressed="true"]):hover { color: var(--site-text); }
 .theme-option:focus-visible { outline: 2px solid var(--site-text); outline-offset: 2px; }
 .theme-material { border: 1px solid var(--site-line); border-radius: 50%; flex: 0 0 auto; height: 18px; width: 18px; background: conic-gradient(#161616 0 50%, #fff 50% 100%); }
