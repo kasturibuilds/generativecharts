@@ -1,5 +1,21 @@
 import { expect, test } from "@playwright/test";
 
+test("theme taps replay chart entrance motion and respect reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/?chart=bar&theme=neon-instruments");
+  const chart = page.locator(".variation-example .ck-chart").first();
+  const airform = page.getByRole("button", { name: "Airform", exact: true });
+  for (let tap = 0; tap < 2; tap++) {
+    await chart.evaluate((node) => node.getAnimations({ subtree: true }).forEach((animation) => animation.finish()));
+    await airform.click();
+    await expect(chart).toHaveAttribute("data-theme", "airform-light");
+    expect(await chart.evaluate((node) => node.getAnimations({ subtree: true }).some((animation) => animation.playState === "running"))).toBe(true);
+  }
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await airform.click();
+  expect(await chart.evaluate((node) => node.getAnimations({ subtree: true }).length)).toBe(0);
+});
+
 for (const width of [390, 1280]) {
   test(`theme previews select charts by keyboard at ${width}px`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });

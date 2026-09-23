@@ -224,6 +224,7 @@ export function Gallery() {
   const initialFamily = isFamily(requestedFamily) ? requestedFamily : "bar";
   const [selectedFamily, setSelectedFamily] = useState<Family>(initialFamily);
   const [theme, setTheme] = useState<ThemeId>(() => themeList.some((item) => item.id === requestedTheme) ? requestedTheme : "mono-editorial");
+  const [themeReplay, setThemeReplay] = useState(0);
   const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
   const [appearanceChoice, setAppearance] = useState<ChartAppearance | null>(requestedAppearance === "light" || requestedAppearance === "dark" ? requestedAppearance : null);
   const appearance: ChartAppearance = appearanceChoice ?? (hydrated && document.documentElement.dataset.siteTheme === "dark" ? "dark" : "light");
@@ -274,7 +275,7 @@ export function Gallery() {
         <div className="theme-navigation">
           <span className="control-label">Theme</span>
           <div aria-label="Chart theme" className="theme-picker" role="group">
-        {themeList.map((item) => <button aria-label={item.name} aria-pressed={theme === item.id} className="theme-option" data-preview-theme={`${item.id}-${appearance}`} key={item.id} onClick={() => setTheme(item.id as ThemeId)} type="button">
+        {themeList.map((item) => <button aria-label={item.name} aria-pressed={theme === item.id} className="theme-option" data-preview-theme={`${item.id}-${appearance}`} key={item.id} onClick={() => { setTheme(item.id as ThemeId); setThemeReplay((value) => value + 1); }} type="button">
           <span aria-hidden="true" className="theme-material" />
           <span className="theme-option-copy"><span className="theme-option-name">{item.name}</span></span>
         </button>)}
@@ -285,7 +286,7 @@ export function Gallery() {
       <div aria-labelledby={`chart-tab-${selectedFamily}`} className={`variation-grid${variations[selectedFamily].length === 1 ? " variation-grid-single" : ""}`} id="chart-preview" role="tabpanel">
         {variations[selectedFamily].map((item) => <article className="variation-example" key={`${selectedFamily}-${item.id}`}>
           <CopyButton iconOnly label="Copy code" value={chartCode(selectedFamily, item.id, theme, appearance)} />
-          <ChartPreview appearance={appearance} family={selectedFamily} height={340} showLegend theme={theme} variation={item.id} />
+          <ChartPreview key={`${theme}-${appearance}-${themeReplay}`} appearance={appearance} family={selectedFamily} height={340} showLegend theme={theme} variation={item.id} />
         </article>)}
       </div>
 
