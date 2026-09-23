@@ -468,7 +468,7 @@ function CohortChartContent<T extends ChartDatum>(props: CohortChartProps<T>) {
 type TerrainPoint<T extends ChartDatum> = { row: T; x: number; z: number; value: number; height: number; label: string };
 
 function terrainProject(x: number, z: number, pointHeight: number, height: number, width: number) {
-  const originY = height * .78;
+  const originY = height * .78 - 24;
   return {
     x: width / 2 + ((x - .5) * 530 + (z - .5) * 210) * (width - 40) / 760,
     y: originY + (z - .5) * 104 - pointHeight * Math.min(190, height * .46) - (x - .5) * 18,
@@ -514,11 +514,11 @@ function TerrainChartContent<T extends ChartDatum>(props: TerrainChartProps<T>) 
   const peakScreen = nearest(peak).screen, lowScreen = nearest(low).screen;
   const synthetic: Series<T> = { dataKey: valueKey, label: String(valueKey) };
   const format = props.valueFormatter ?? defaultFormat;
-  const callout = (kind: "PEAK" | "LOW", point: TerrainPoint<T>, screen: { x: number; y: number }) => {
-    const right = screen.x < WIDTH * .64;
-    const textX = right ? Math.min(screen.x + 78, WIDTH - 112) : Math.max(screen.x - 78, 112);
-    const lineY = Math.max(36, screen.y - 48);
-    return <g className="ck-terrain-callout"><circle cx={screen.x} cy={screen.y} fill="var(--ck-background)" r="5" stroke="var(--ck-text)" strokeWidth="1.5" /><polyline fill="none" points={`${screen.x},${screen.y} ${screen.x},${lineY} ${textX},${lineY}`} stroke="var(--ck-text-muted)" /><text className="ck-terrain-callout-title" textAnchor={right ? "start" : "end"} x={textX} y={lineY - 8}>{kind}</text><text className="ck-terrain-callout-value" textAnchor={right ? "start" : "end"} x={textX} y={lineY + 10}>{point.label} · {format(point.value)}</text></g>;
+  const callout = (kind: "Highest point" | "Lowest point", point: TerrainPoint<T>, screen: { x: number; y: number }) => {
+    const right = kind === "Highest point";
+    const textX = right ? 24 : WIDTH - 24;
+    const lineY = 48;
+    return <g className="ck-terrain-callout"><circle cx={screen.x} cy={screen.y} fill="var(--ck-background)" r="5" stroke="var(--ck-text)" strokeWidth="1.5" /><polyline fill="none" points={`${screen.x},${screen.y} ${screen.x},${lineY} ${textX},${lineY}`} stroke="var(--ck-text-muted)" /><text className="ck-terrain-callout-title" textAnchor={right ? "start" : "end"} x={textX} y={lineY - 8}>{kind}</text><text className="ck-terrain-callout-value" textAnchor={right ? "start" : "end"} x={textX} y={lineY + 10}>{format(point.value)}</text></g>;
   };
 
   return <ChartFrame {...props} family="terrain" height={height} showLegend={false} tooltip={tooltip}><SvgCanvas id={id} height={height} label={props.ariaLabel ?? props.title ?? "3D terrain chart"} description={props.description ?? `A projected terrain surface with a peak at ${peak.label} and a low point at ${low.label}.`}>
@@ -528,9 +528,13 @@ function TerrainChartContent<T extends ChartDatum>(props: TerrainChartProps<T>) 
     {showWireframe && <g className="ck-terrain-wire">{rows.map((row, index) => index % 2 === 0 || index === rows.length - 1 ? <polyline className="ck-terrain-trace" pathLength="1" style={{ "--ck-index": index / gridSize * 8 } as CSSProperties} key={`row-${index}`} points={row.map((point) => `${point.screen.x},${point.screen.y}`).join(" ")} /> : null)}{Array.from({ length: gridSize }, (_, index) => index % 3 === 0 || index === gridSize - 1 ? <polyline className="ck-terrain-trace" pathLength="1" style={{ "--ck-index": index / gridSize * 8 } as CSSProperties} key={`column-${index}`} points={rows.map((row) => `${row[index].screen.x},${row[index].screen.y}`).join(" ")} /> : null)}</g>}
     {showPointCloud && <g className="ck-terrain-cloud">{projected.map((point, index) => <circle className="ck-terrain-point" cx={point.screen.x} cy={point.screen.y} fill={point.height > .72 ? "var(--ck-point-stroke)" : "var(--ck-text-muted)"} key={index} opacity={.24 + point.height * .66} r={1.1 + point.height * 1.25} />)}</g>}
     <g>{controls.map((point, index) => { const screen = nearest(point).screen; return <circle {...markEvents(point.row, synthetic, point.value, point.label, setTooltip, props, "var(--ck-point-stroke)")} className="ck-mark ck-terrain-control" cx={screen.x} cy={screen.y} fill="var(--ck-background)" key={index} r="4" stroke="var(--ck-point-stroke)" strokeWidth="1.5" style={{ "--ck-index": index } as CSSProperties} />; })}</g>
-    {callout("PEAK", peak, peakScreen)}
-    {callout("LOW", low, lowScreen)}
-    <text className="ck-terrain-axis" x="24" y={height - 18}>X {String(xKey)} · Y {String(valueKey)} · Z {String(zKey)}</text>
+    {callout("Highest point", peak, peakScreen)}
+    {callout("Lowest point", low, lowScreen)}
+    {[
+      { axis: "X", label: xKey === "x" ? "Position" : xKey, x: 24, anchor: "start" },
+      { axis: "Y", label: valueKey, x: WIDTH / 2, anchor: "middle" },
+      { axis: "Z", label: zKey === "z" ? "Depth" : zKey, x: WIDTH - 24, anchor: "end" },
+    ].map(({ axis, label, x, anchor }) => <text className="ck-terrain-axis" key={axis} textAnchor={anchor as "start" | "middle" | "end"} x={x} y={height - 18}>{axis}: {label.charAt(0).toUpperCase() + label.slice(1)}</text>)}
   </SvgCanvas></ChartFrame>;
 }
 

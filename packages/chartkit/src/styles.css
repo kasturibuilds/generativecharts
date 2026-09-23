@@ -127,11 +127,10 @@
 .ck-terrain-callout text, .ck-terrain-axis { fill: var(--ck-text-muted); font-family: var(--ck-font); }
 .ck-terrain-callout-title { fill: var(--ck-text) !important; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .ck-terrain-callout-value { font-size: 12px; }
-.ck-terrain-axis { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.ck-terrain-axis { font-size: 12px; }
 .ck-chart[data-theme^="mono-editorial"] .ck-terrain-wire polyline { stroke: var(--ck-text-muted); stroke-width: .85; }
 .ck-chart[data-theme^="mono-editorial"] .ck-terrain-glow { display: none; }
-.ck-chart[data-theme^="mono-editorial"] .ck-terrain-callout text,
-.ck-chart[data-theme^="mono-editorial"] .ck-terrain-axis { letter-spacing: .1em; text-transform: uppercase; }
+.ck-chart[data-theme^="mono-editorial"] .ck-terrain-callout-title { letter-spacing: .04em; }
 .ck-chart[data-theme^="neon-instruments"] .ck-terrain-wire polyline { stroke: var(--ck-point-stroke); stroke-opacity: .52; }
 .ck-chart[data-theme^="airform"] .ck-terrain-wire polyline { stroke: var(--ck-point-stroke); stroke-opacity: .52; }
 .ck-chart[data-theme^="airform"] .ck-terrain-point { filter: drop-shadow(0 5px 5px var(--ck-mark-shadow)); }
@@ -230,30 +229,32 @@
 .ck-chart.ck-animate.ck-cohort .ck-cohort-cell { animation-name: ck-mark-resolve; }
 .ck-chart[data-theme^="mono-editorial"] .ck-line-secondary { animation: none; stroke-dasharray: 8 6; }
 /* Entry motion follows chart grammar; clipping preserves exact strokes and positions. */
-.ck-chart.ck-animate :is(.ck-funnel-step, .ck-treemap-cell, .ck-box-reveal, .ck-sankey-node-group, .ck-waterfall-connector, .ck-terrain-cloud, .ck-terrain-callout) {
+.ck-chart.ck-animate[data-family] :is(.ck-funnel-step, .ck-treemap-cell, .ck-box-reveal, .ck-waterfall-connector, .ck-terrain-cloud, .ck-terrain-callout) {
   animation: ck-reveal-down var(--ck-motion-duration) var(--ck-motion-easing) backwards;
   animation-delay: calc(min(var(--ck-index, 0), 8) * 24ms);
 }
-.ck-chart.ck-animate :is(.ck-funnel-stage, .ck-sankey-link, .ck-treemap-tile, .ck-box-group) { animation: none; }
-.ck-chart.ck-animate .ck-funnel-step-bar { animation-name: ck-reveal-right; }
-.ck-chart.ck-animate .ck-treemap-cell { animation-name: ck-tile-reveal; }
-.ck-chart.ck-animate .ck-box-reveal { animation-name: ck-box-open; }
-.ck-chart.ck-animate .ck-waterfall-connector { animation-name: ck-reveal-right; }
-.ck-chart.ck-animate :is(.ck-waterfall-bar, .ck-combo-bar, .ck-histogram-bar) { animation-name: ck-reveal-up; }
-.ck-chart.ck-animate :is(.ck-waterfall-bar, .ck-combo-bar)[data-direction="down"] { animation-name: ck-reveal-down; }
-.ck-chart.ck-animate :is(.ck-flow-draw, .ck-combo-line, .ck-terrain-trace) {
+.ck-chart.ck-animate[data-family] :is(.ck-funnel-stage, .ck-sankey-link, .ck-treemap-tile, .ck-box-group) { animation: none; }
+.ck-chart.ck-animate[data-family] .ck-sankey-reveal { animation: ck-reveal-right var(--ck-motion-duration) var(--ck-motion-easing) backwards; }
+.ck-chart.ck-animate[data-family] .ck-funnel-step-bar { animation-name: ck-reveal-right; }
+.ck-chart.ck-animate[data-family] .ck-treemap-cell { animation-name: ck-tile-reveal; }
+.ck-chart.ck-animate[data-family] .ck-box-reveal { animation-name: ck-box-open; }
+.ck-chart.ck-animate[data-family] .ck-waterfall-connector { animation-name: ck-reveal-right; }
+.ck-chart.ck-animate[data-family] :is(.ck-combo-bar, .ck-histogram-bar) { animation-name: ck-reveal-up; }
+.ck-chart.ck-animate[data-family] .ck-combo-bar[data-direction="down"] { animation-name: ck-reveal-down; }
+.ck-chart.ck-animate[data-family] .ck-waterfall-bar { animation-name: ck-reveal-down; }
+.ck-chart.ck-animate[data-family] :is(.ck-combo-line, .ck-terrain-trace) {
   animation: ck-line-draw var(--ck-motion-duration) var(--ck-motion-easing) backwards;
   animation-delay: calc(min(var(--ck-index, 0), 8) * 24ms);
   stroke-dasharray: 1;
 }
-.ck-chart.ck-animate .ck-combo-line { animation-delay: 120ms; }
+.ck-chart.ck-animate[data-family] .ck-combo-line { animation-delay: 120ms; }
 .ck-chart.ck-animate.ck-combo .ck-point { animation-name: ck-detail-resolve; animation-delay: calc(160ms + min(var(--ck-index, 0), 8) * 24ms); }
-.ck-chart.ck-animate .ck-map-region { animation-name: ck-tile-reveal; }
-.ck-chart.ck-animate .ck-terrain-cloud { animation-name: ck-reveal-up; animation-delay: 80ms; }
-.ck-chart.ck-animate .ck-terrain-control { animation-name: ck-detail-resolve; animation-delay: 180ms; }
-.ck-chart.ck-animate .ck-terrain-callout { animation-name: ck-reveal-down; animation-delay: 240ms; }
+.ck-chart.ck-animate[data-family] .ck-map-region { animation-name: ck-tile-reveal; }
+.ck-chart.ck-animate[data-family] .ck-terrain-cloud { animation-name: ck-reveal-up; animation-delay: 80ms; }
+.ck-chart.ck-animate[data-family] .ck-terrain-control { animation-name: ck-detail-resolve; animation-delay: 180ms; }
+.ck-chart.ck-animate[data-family] .ck-terrain-callout { animation-name: ck-reveal-down; animation-delay: 240ms; }
 /* Keyboard access resolves an entering figure immediately. */
-.ck-chart.ck-animate:focus-within .ck-svg * { animation: none; }
+.ck-chart.ck-animate:focus-within .ck-svg * { animation: none !important; }
 @keyframes ck-reveal-up { from { clip-path: inset(100% 0 0); } to { clip-path: inset(-4px); } }
 @keyframes ck-reveal-down { from { clip-path: inset(0 0 100%); } to { clip-path: inset(-4px); } }
 @keyframes ck-reveal-right { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(-4px); } }
@@ -317,7 +318,7 @@
 .ck-responsive[data-layout="compact"] .ck-source { align-items: flex-start; flex-direction: column; gap: 5px; padding-left: 20px; padding-right: 20px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ck-chart.ck-animate .ck-svg * { animation: none; }
+  .ck-chart.ck-animate .ck-svg * { animation: none !important; }
   .ck-mark { transition: none; }
 }
 

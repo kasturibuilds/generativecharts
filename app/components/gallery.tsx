@@ -34,24 +34,29 @@ type Variation = { id: string; name: string; use: string };
 type CatalogItem = { id: Family; name: string };
 
 const catalog: CatalogItem[] = [
+  // Comparison and trends
   { id: "bar", name: "Bar" },
   { id: "line", name: "Line" },
   { id: "area", name: "Area" },
-  { id: "scatter", name: "Scatter" },
-  { id: "pie", name: "Pie" },
-  { id: "radar", name: "Radar" },
-  { id: "radial", name: "Radial" },
+  { id: "combo", name: "Combo" },
+  { id: "waterfall", name: "Waterfall" },
+  // Matrices and spatial data
   { id: "heatmap", name: "Heatmap" },
   { id: "cohort", name: "Cohort" },
-  { id: "funnel", name: "Funnel" },
-  { id: "sankey", name: "Sankey" },
-  { id: "treemap", name: "Treemap" },
-  { id: "waterfall", name: "Waterfall" },
-  { id: "combo", name: "Combo" },
+  { id: "terrain", name: "3D terrain" },
+  { id: "choropleth", name: "Map" },
+  // Relationships and distributions
+  { id: "scatter", name: "Scatter" },
   { id: "histogram", name: "Histogram" },
   { id: "boxplot", name: "Box plot" },
-  { id: "choropleth", name: "Map" },
-  { id: "terrain", name: "3D terrain" },
+  // Composition and profiles
+  { id: "pie", name: "Pie" },
+  { id: "treemap", name: "Treemap" },
+  { id: "radial", name: "Radial" },
+  { id: "radar", name: "Radar" },
+  // Flow and conversion
+  { id: "funnel", name: "Funnel" },
+  { id: "sankey", name: "Sankey" },
 ];
 
 const variations: Record<Family, Variation[]> = {
@@ -286,7 +291,7 @@ export function Gallery() {
         </div>
       </div>
 
-      <div aria-labelledby={`chart-tab-${selectedFamily}`} className={`variation-grid${variations[selectedFamily].length === 1 ? " variation-grid-single" : ""}`} id="chart-preview" role="tabpanel">
+      <div aria-labelledby={`chart-tab-${selectedFamily}`} className="variation-grid" id="chart-preview" role="tabpanel">
         {variations[selectedFamily].map((item) => <article className="variation-example" key={`${selectedFamily}-${item.id}`}>
           <CopyButton iconOnly label="Copy code" value={chartCode(selectedFamily, item.id, theme, appearance)} />
           <ChartPreview key={`${theme}-${appearance}-${themeReplay}`} animate={themeReplay > 0} appearance={appearance} family={selectedFamily} height={340} showLegend theme={theme} variation={item.id} />

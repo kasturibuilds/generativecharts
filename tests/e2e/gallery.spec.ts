@@ -81,18 +81,38 @@ test("shareable chart and theme state restores from the URL", async ({ page }) =
   await expect(page.locator(".variation-example")).toHaveCount(3);
 });
 
-test("standalone chart variations use a bounded preview width", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/?chart=treemap&theme=mono-editorial&mode=light");
-
-  const gridWidth = await page.locator(".variation-grid").evaluate((element) => element.getBoundingClientRect().width);
-  const chartWidth = await page.locator(".variation-example").evaluate((element) => element.getBoundingClientRect().width);
-
-  expect(chartWidth).toBeLessThan(gridWidth * 0.85);
-  expect(chartWidth).toBeLessThanOrEqual(960);
-
-  await page.getByRole("tab", { name: "Pie", exact: true }).click();
-  const multiChartWidth = await page.locator(".variation-example").first().evaluate((element) => element.getBoundingClientRect().width);
-
-  expect(multiChartWidth).toBeLessThan(chartWidth);
-});
+for (const width of [390, 1280]) {
+  test(`chart browsing keeps preview columns and scroll position stable at ${width}px`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const firstChart = page.locator(".variation-example").first();
+    const initial = await firstChart.boundingBox();
+    expect(initial).not.toBeNull();
+    const names = await page.getByRole("tab").allTextContents();
+    for (const theme of ["Mono Editorial", "Neon Instruments", "Airform"]) {
+      await page.getByRole("button", { name: theme, exact: true }).click();
+      for (const name of names) {
+        await page.getByRole("tab", { name, exact: true }).click();
+        const bounds = await firstChart.boundingBox();
+        if (await page.locator(".variation-example").count() === 1) {
+          const grid = await page.locator(".variation-grid").boundingBox();
+          expect(bounds!.x + bounds!.width / 2).toBeCloseTo(grid!.x + grid!.width / 2, 0);
+        } else {
+          expect(bounds!.x).toBeCloseTo(initial!.x, 0);
+        }
+        expect(bounds!.width).toBeCloseTo(initial!.width, 0);
+        // Dense radial labels may need extra height on narrow screens.
+        expect(bounds!.height).toBeGreaterThanOrEqual(initial!.height);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      }
+      await page.screenshot({ path: testInfo.outputPath(`stable-gallery-${theme}-${width}.png`), fullPage: true });
+    }
+    await page.getByRole("tab", { name: "Bar", exact: true }).click();
+    await page.locator(".gallery-toolbar").evaluate(node => window.scrollTo(0, node.getBoundingClientRect().top + window.scrollY));
+    const scrollY = await page.evaluate(() => window.scrollY);
+    await page.getByRole("tab", { name: "Treemap", exact: true }).click();
+    expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(scrollY, 0);
+    expect((await firstChart.boundingBox())!.height).toBeCloseTo(initial!.height, 0);
+  });
+}

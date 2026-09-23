@@ -99,9 +99,12 @@ button, select { font: inherit; }
 .theme-option[data-preview-theme^="neon-instruments"] .theme-material { border: 0; background: conic-gradient(#f34485 0 40%, #50e1a1 40% 72%, #35c9ed 72% 100%); }
 .theme-option[data-preview-theme^="airform"] .theme-material { border: 0; background: linear-gradient(135deg, #f1faff 5%, #9dcfff 48%, #377de2); }
 .theme-option[data-preview-theme="airform-dark"] .theme-material { background: linear-gradient(135deg, #c1e6ff, #4675b4 48%, #10223f); }
-.variation-grid { display: grid; gap: 36px 22px; grid-auto-rows: 1fr; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 28px; min-width: 0; }
-.variation-grid-single { grid-template-columns: minmax(0, 960px); justify-content: center; }
-.variation-example { display: flex; min-width: 0; position: relative; }
+/* Leave enough page below the controls to avoid scroll clamping on shorter tabs.
+   The footer supplies the remaining viewport space. */
+.variation-grid { display: grid; gap: 36px 22px; align-content: start; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 28px; min-height: calc(100svh - 320px); min-width: 0; }
+/* Stable preview slots; unusually tall figures can still grow without clipping. */
+.variation-example { display: flex; min-height: 560px; min-width: 0; position: relative; }
+.variation-example:only-child { grid-column: 1 / -1; justify-self: center; width: calc((100% - 22px) / 2); }
 .variation-example > .ck-responsive { display: flex; }
 .variation-example .ck-chart { box-shadow: none; display: flex; flex-direction: column; }
 /* Use the bundled mono face so gallery typography is independent of host fonts. */
@@ -116,7 +119,7 @@ button, select { font: inherit; }
 .variation-example:has(.ck-chart[data-theme="airform-light"]) > .copy-button:hover { background: #fff; border-color: #9ac9ed; }
 .variation-example:has(.ck-chart[data-theme="airform-dark"]) > .copy-button { background: rgba(27, 63, 107, .8); border-color: rgba(164, 210, 255, .3); color: #e1f2ff; }
 .variation-example:has(.ck-chart[data-theme="airform-dark"]) > .copy-button:hover { background: #285585; border-color: #9ac9ed; }
-.variation-example .ck-responsive .ck-chart .ck-header { padding-right: 64px; }
+.variation-example .ck-responsive .ck-chart .ck-header { min-height: 116px; padding-right: 64px; }
 .variation-example .ck-figure-label { font-size: 14px; letter-spacing: -.01em; text-transform: none; }
 
 .text-button { background: transparent; border: 0; color: inherit; cursor: pointer; font: inherit; padding: 4px 0; }
@@ -161,6 +164,7 @@ button, select { font: inherit; }
 
 @media (max-width: 1100px) {
   .variation-grid { grid-template-columns: 1fr; }
+  .variation-example:only-child { width: 100%; }
 }
 
 @media (max-width: 860px) {
@@ -182,6 +186,8 @@ button, select { font: inherit; }
   .family-tabs { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; width: 100%; padding-bottom: 2px; }
   .playground { padding-bottom: 40px; }
   .variation-grid { gap: 26px; }
+  .variation-example { min-height: 600px; }
+  .variation-example .ck-responsive .ck-chart .ck-header { min-height: 144px; }
   .docs-card-grid { grid-template-columns: 1fr; }
   .prop-row { grid-template-columns: 1fr; }
   .prop-row span { display: block; }
