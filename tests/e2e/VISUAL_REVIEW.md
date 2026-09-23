@@ -26,3 +26,15 @@ published package's consumer font defaults unchanged. The updated typography
 was reviewed again before refreshing the affected captures. The font review also exposed compact header padding
 overriding the gallery copy-button clearance; the gallery rule now takes
 precedence, and the readiness audit checks that titles do not overlap copy buttons.
+
+## Page entrance review
+
+The gallery now ships complete static markup rather than a loading fallback.
+Desktop entrance frames and the settled mobile layout were reviewed: the header
+stays still, the headline clears a subtle blur, controls rise slightly, and the
+chart region fades without moving its cards. Reduced motion skips the reveal.
+The 52 loading, gallery, and readiness checks pass across all chart families and
+documentation layouts. Existing composition, outline bars, and theme treatments
+are preserved. Four desktop Mono Editorial pie baselines were reviewed side by
+side and refreshed for minor edge rasterization differences; the other 218
+snapshots were unchanged. The visual tolerance remains unchanged.

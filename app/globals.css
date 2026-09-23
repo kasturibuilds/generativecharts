@@ -187,6 +187,29 @@ button, select { font: inherit; }
   .prop-row span { display: block; }
 }
 
+/* The header is present in the static HTML; the page never waits on a loader.
+   Reveal content once, with no persistent transforms or moving chart cards. */
+@keyframes catalog-headline-enter {
+  from { opacity: 0; filter: blur(6px); transform: translateY(8px); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+@keyframes catalog-content-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes catalog-chart-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .catalog-page .catalog-hero h1 { animation: catalog-headline-enter 680ms cubic-bezier(.22, 1, .36, 1) backwards; }
+  .catalog-page .install-pill { animation: catalog-content-enter 600ms cubic-bezier(.22, 1, .36, 1) 70ms backwards; }
+  .catalog-page .gallery-toolbar { animation: catalog-content-enter 560ms cubic-bezier(.22, 1, .36, 1) 130ms backwards; }
+  .catalog-page .variation-grid { animation: catalog-chart-enter 640ms ease-out 180ms backwards; }
+  .catalog-page :is(.install-pill, .gallery-toolbar, .variation-grid):focus-within { animation: none; }
+}
+.catalog-page .brand-mark-dot { animation: none; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .brand-mark-dot { animation: none; }

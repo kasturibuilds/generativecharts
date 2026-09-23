@@ -4,7 +4,6 @@ import { useEffect, useState, useSyncExternalStore, type MouseEvent, type Keyboa
 import Link from "next/link";
 import { Brand } from "./brand";
 import { ThemeIcon } from "./theme-icon";
-import { useSearchParams } from "next/navigation";
 import {
   AreaChart,
   BarChart,
@@ -217,16 +216,21 @@ const clientHydrated = () => true;
 const serverHydrated = () => false;
 
 export function Gallery() {
-  const params = useSearchParams();
+  const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
+  // Keep the complete default gallery in the static HTML. Read share-link
+  // selections after hydration rather than suspending the whole page.
+  const params = new URLSearchParams(hydrated ? window.location.search : "");
   const requestedTheme = params.get("theme") as ThemeId;
   const requestedAppearance = params.get("mode") as ChartAppearance;
   const requestedFamily = params.get("chart");
   const initialFamily = isFamily(requestedFamily) ? requestedFamily : "bar";
-  const [selectedFamily, setSelectedFamily] = useState<Family>(initialFamily);
-  const [theme, setTheme] = useState<ThemeId>(() => themeList.some((item) => item.id === requestedTheme) ? requestedTheme : "mono-editorial");
+  const [familyChoice, setSelectedFamily] = useState<Family | null>(null);
+  const selectedFamily = familyChoice ?? initialFamily;
+  const [themeChoice, setTheme] = useState<ThemeId | null>(null);
+  const theme = themeChoice ?? (themeList.some((item) => item.id === requestedTheme) ? requestedTheme : "mono-editorial");
   const [themeReplay, setThemeReplay] = useState(0);
-  const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
-  const [appearance, setAppearance] = useState<ChartAppearance>(requestedAppearance === "light" ? "light" : "dark");
+  const [appearanceChoice, setAppearance] = useState<ChartAppearance | null>(null);
+  const appearance = appearanceChoice ?? (requestedAppearance === "light" ? "light" : "dark");
   useEffect(() => {
     if (!hydrated) return;
     document.documentElement.dataset.siteTheme = appearance;
@@ -242,6 +246,7 @@ export function Gallery() {
 
   function selectChart(family: Family) {
     setSelectedFamily(family);
+    setThemeReplay((value) => value + 1);
   }
 
   function navigateTabs(event: KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -252,11 +257,11 @@ export function Gallery() {
     document.getElementById(`chart-tab-${catalog[next].id}`)?.focus();
   }
 
-  return <main data-chart-theme={theme} id="top">
+  return <main className="catalog-page" data-chart-theme={theme} id="top">
     <nav className="site-nav shell">
       <Brand />
       <div className="nav-links"><a href="#charts">Charts</a><Link href="/docs">Docs</Link></div>
-      <div className="nav-actions"><button aria-label={`Switch to ${appearance === "light" ? "dark" : "light"} mode`} className="theme-toggle" onClick={() => setAppearance(appearance === "light" ? "dark" : "light")} type="button"><ThemeIcon appearance={appearance} /></button><Link className="nav-install nav-docs-mobile" href="/docs">Docs <span>↗</span></Link></div>
+      <div className="nav-actions"><button aria-label={`Switch to ${appearance === "light" ? "dark" : "light"} mode`} className="theme-toggle" onClick={() => { setAppearance(appearance === "light" ? "dark" : "light"); setThemeReplay((value) => value + 1); }} type="button"><ThemeIcon appearance={appearance} /></button><Link className="nav-install nav-docs-mobile" href="/docs">Docs <span>↗</span></Link></div>
     </nav>
 
     <header className="catalog-hero shell">
@@ -284,7 +289,7 @@ export function Gallery() {
       <div aria-labelledby={`chart-tab-${selectedFamily}`} className={`variation-grid${variations[selectedFamily].length === 1 ? " variation-grid-single" : ""}`} id="chart-preview" role="tabpanel">
         {variations[selectedFamily].map((item) => <article className="variation-example" key={`${selectedFamily}-${item.id}`}>
           <CopyButton iconOnly label="Copy code" value={chartCode(selectedFamily, item.id, theme, appearance)} />
-          <ChartPreview key={`${theme}-${appearance}-${themeReplay}`} appearance={appearance} family={selectedFamily} height={340} showLegend theme={theme} variation={item.id} />
+          <ChartPreview key={`${theme}-${appearance}-${themeReplay}`} animate={themeReplay > 0} appearance={appearance} family={selectedFamily} height={340} showLegend theme={theme} variation={item.id} />
         </article>)}
       </div>
 
