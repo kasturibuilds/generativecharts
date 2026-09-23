@@ -104,6 +104,11 @@ button, select { font: inherit; }
 .variation-example { display: flex; min-width: 0; position: relative; }
 .variation-example > .ck-responsive { display: flex; }
 .variation-example .ck-chart { box-shadow: none; display: flex; flex-direction: column; }
+/* Use the bundled mono face so gallery typography is independent of host fonts. */
+.variation-example .ck-chart[data-theme^="mono-editorial"],
+.variation-example .ck-chart[data-theme^="mono-editorial"] *,
+.variation-example .ck-mono-type-legend text,
+.variation-example .ck-mono-radial-label text { font-family: var(--font-geist-mono), monospace; }
 .variation-example .ck-legend { margin-top: auto; }
 .variation-example > .copy-button { position: absolute; right: 18px; top: 18px; z-index: 4; }
 .variation-example:has(.ck-chart[data-theme^="mono-editorial-"]) > .copy-button { background: transparent; }
@@ -111,7 +116,7 @@ button, select { font: inherit; }
 .variation-example:has(.ck-chart[data-theme="airform-light"]) > .copy-button:hover { background: #fff; border-color: #9ac9ed; }
 .variation-example:has(.ck-chart[data-theme="airform-dark"]) > .copy-button { background: rgba(27, 63, 107, .8); border-color: rgba(164, 210, 255, .3); color: #e1f2ff; }
 .variation-example:has(.ck-chart[data-theme="airform-dark"]) > .copy-button:hover { background: #285585; border-color: #9ac9ed; }
-.variation-example .ck-header { padding-right: 64px; }
+.variation-example .ck-responsive .ck-chart .ck-header { padding-right: 64px; }
 .variation-example .ck-figure-label { font-size: 14px; letter-spacing: -.01em; text-transform: none; }
 
 .text-button { background: transparent; border: 0; color: inherit; cursor: pointer; font: inherit; padding: 4px 0; }

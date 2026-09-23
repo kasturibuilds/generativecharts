@@ -30,6 +30,13 @@ for (const width of [390, 1280]) {
             });
           }));
           expect(issues, `${family}/${theme}/${mode}/${width}`).toEqual([]);
+          const titleOverlapsCopy = await page.locator(".variation-example").evaluateAll((examples) => examples.some((example) => {
+            const title = example.querySelector(".ck-title")?.getBoundingClientRect();
+            const copy = example.querySelector(":scope > .copy-button")?.getBoundingClientRect();
+            return title && copy && title.right > copy.left && title.top < copy.bottom && title.bottom > copy.top;
+          }));
+          expect(titleOverlapsCopy, `${family}/${theme}/${mode}/${width}: title overlaps copy button`).toBe(false);
+
           expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
           await page.locator(".variation-grid").screenshot({ path: testInfo.outputPath(`${family}-${theme}-${mode}-${width}.png`), animations: "disabled" });
           await testInfo.attach(`${family}-${theme}-${mode}-${width}`, { path: testInfo.outputPath(`${family}-${theme}-${mode}-${width}.png`), contentType: "image/png" });

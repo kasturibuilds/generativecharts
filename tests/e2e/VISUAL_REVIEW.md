@@ -17,3 +17,12 @@ No drawer is present in the current gallery.
 The visual suite retains its 100-pixel tolerance. It now waits for the selected
 theme, loaded fonts, and responsive SVG width instead of a fixed 100ms delay.
 Baseline updates must continue to follow the review requirements in `DESIGN.md`.
+
+The first CI verification exposed OS-dependent monospace metrics: all 74 Mono
+Editorial captures and four extruded-pie captions differed from the local Mac.
+The gallery now uses its already bundled Geist Mono font for these elements.
+This keeps application typography consistent across hosts while leaving the
+published package's consumer font defaults unchanged. The updated typography
+was reviewed again before refreshing the affected captures. The font review also exposed compact header padding
+overriding the gallery copy-button clearance; the gallery rule now takes
+precedence, and the readiness audit checks that titles do not overlap copy buttons.
