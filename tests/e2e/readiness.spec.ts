@@ -47,16 +47,24 @@ for (const width of [390, 1280]) {
   }
 }
 
-test("saved light mode hydrates and an explicit URL mode wins", async ({ page }) => {
+test("fresh visits stay dark with a clean URL despite a saved light preference", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.addInitScript(() => localStorage.setItem("chartkit-site-theme", "light"));
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Switch to dark mode" })).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("data-site-theme", "light");
-  await page.goto("/?mode=dark");
   await expect(page.getByRole("button", { name: "Switch to light mode" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-site-theme", "dark");
+  await expect(page.locator(".ck-chart").first()).toHaveAttribute("data-theme", "mono-editorial-dark");
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto("/?mode=light");
+  await expect(page.getByRole("button", { name: "Switch to dark mode" })).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("data-site-theme", "light");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-site-theme", "light");
+  await page.getByRole("button", { name: "Switch to dark mode" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto("/?theme=mono-editorial&mode=dark&chart=bar&ref=share#charts");
+  await expect(page).toHaveURL(/\/\?ref=share#charts$/);
   expect(errors).toEqual([]);
 });
 

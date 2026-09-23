@@ -226,18 +226,18 @@ export function Gallery() {
   const [theme, setTheme] = useState<ThemeId>(() => themeList.some((item) => item.id === requestedTheme) ? requestedTheme : "mono-editorial");
   const [themeReplay, setThemeReplay] = useState(0);
   const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
-  const [appearanceChoice, setAppearance] = useState<ChartAppearance | null>(requestedAppearance === "light" || requestedAppearance === "dark" ? requestedAppearance : null);
-  const appearance: ChartAppearance = appearanceChoice ?? (hydrated && document.documentElement.dataset.siteTheme === "light" ? "light" : "dark");
+  const [appearance, setAppearance] = useState<ChartAppearance>(requestedAppearance === "light" ? "light" : "dark");
   useEffect(() => {
     if (!hydrated) return;
     document.documentElement.dataset.siteTheme = appearance;
     document.documentElement.style.colorScheme = appearance;
     try { localStorage.setItem("chartkit-site-theme", appearance); } catch { /* Storage can be disabled in private browsing. */ }
-    const next = new URLSearchParams();
-    next.set("theme", theme);
-    next.set("mode", appearance);
-    next.set("chart", selectedFamily);
-    window.history.replaceState({}, "", `${window.location.pathname}?${next}`);
+    const next = new URL(window.location.href);
+    for (const [key, value, defaultValue] of [["theme", theme, "mono-editorial"], ["mode", appearance, "dark"], ["chart", selectedFamily, "bar"]]) {
+      if (value === defaultValue) next.searchParams.delete(key);
+      else next.searchParams.set(key, value);
+    }
+    window.history.replaceState({}, "", `${next.pathname}${next.search}${next.hash}`);
   }, [appearance, hydrated, selectedFamily, theme]);
 
   function selectChart(family: Family) {
