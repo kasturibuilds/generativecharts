@@ -229,6 +229,38 @@
 .ck-chart.ck-animate.ck-heatmap .ck-heat-cell,
 .ck-chart.ck-animate.ck-cohort .ck-cohort-cell { animation-name: ck-mark-resolve; }
 .ck-chart[data-theme^="mono-editorial"] .ck-line-secondary { animation: none; stroke-dasharray: 8 6; }
+/* Entry motion follows chart grammar; clipping preserves exact strokes and positions. */
+.ck-chart.ck-animate :is(.ck-funnel-step, .ck-treemap-cell, .ck-box-reveal, .ck-sankey-node-group, .ck-waterfall-connector, .ck-terrain-cloud, .ck-terrain-callout) {
+  animation: ck-reveal-down var(--ck-motion-duration) var(--ck-motion-easing) backwards;
+  animation-delay: calc(min(var(--ck-index, 0), 8) * 24ms);
+}
+.ck-chart.ck-animate :is(.ck-funnel-stage, .ck-sankey-link, .ck-treemap-tile, .ck-box-group) { animation: none; }
+.ck-chart.ck-animate .ck-funnel-step-bar { animation-name: ck-reveal-right; }
+.ck-chart.ck-animate .ck-treemap-cell { animation-name: ck-tile-reveal; }
+.ck-chart.ck-animate .ck-box-reveal { animation-name: ck-box-open; }
+.ck-chart.ck-animate .ck-waterfall-connector { animation-name: ck-reveal-right; }
+.ck-chart.ck-animate :is(.ck-waterfall-bar, .ck-combo-bar, .ck-histogram-bar) { animation-name: ck-reveal-up; }
+.ck-chart.ck-animate :is(.ck-waterfall-bar, .ck-combo-bar)[data-direction="down"] { animation-name: ck-reveal-down; }
+.ck-chart.ck-animate :is(.ck-flow-draw, .ck-combo-line, .ck-terrain-trace) {
+  animation: ck-line-draw var(--ck-motion-duration) var(--ck-motion-easing) backwards;
+  animation-delay: calc(min(var(--ck-index, 0), 8) * 24ms);
+  stroke-dasharray: 1;
+}
+.ck-chart.ck-animate .ck-combo-line { animation-delay: 120ms; }
+.ck-chart.ck-animate.ck-combo .ck-point { animation-name: ck-detail-resolve; animation-delay: calc(160ms + min(var(--ck-index, 0), 8) * 24ms); }
+.ck-chart.ck-animate .ck-map-region { animation-name: ck-tile-reveal; }
+.ck-chart.ck-animate .ck-terrain-cloud { animation-name: ck-reveal-up; animation-delay: 80ms; }
+.ck-chart.ck-animate .ck-terrain-control { animation-name: ck-detail-resolve; animation-delay: 180ms; }
+.ck-chart.ck-animate .ck-terrain-callout { animation-name: ck-reveal-down; animation-delay: 240ms; }
+/* Keyboard access resolves an entering figure immediately. */
+.ck-chart.ck-animate:focus-within .ck-svg * { animation: none; }
+@keyframes ck-reveal-up { from { clip-path: inset(100% 0 0); } to { clip-path: inset(-4px); } }
+@keyframes ck-reveal-down { from { clip-path: inset(0 0 100%); } to { clip-path: inset(-4px); } }
+@keyframes ck-reveal-right { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(-4px); } }
+@keyframes ck-tile-reveal { from { clip-path: inset(0 100% 100% 0); } to { clip-path: inset(-4px); } }
+@keyframes ck-box-open { from { clip-path: inset(50% 0); } to { clip-path: inset(-4px); } }
+@keyframes ck-detail-resolve { from { clip-path: circle(0%); } to { clip-path: circle(100%); } }
+
 @keyframes ck-enter { from { opacity: 0; transform: translateY(5px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes ck-mono-enter { from { transform: translateY(5px); } to { transform: translateY(0); } }
 @keyframes ck-trace { from { stroke-dashoffset: 1800; } to { stroke-dashoffset: 0; } }
@@ -285,7 +317,7 @@
 .ck-responsive[data-layout="compact"] .ck-source { align-items: flex-start; flex-direction: column; gap: 5px; padding-left: 20px; padding-right: 20px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ck-animate .ck-mark, .ck-animate .ck-line-trace, .ck-animate .ck-line-reveal, .ck-animate .ck-line-draw, .ck-animate .ck-radial-draw { animation: none; }
+  .ck-chart.ck-animate .ck-svg * { animation: none; }
   .ck-mark { transition: none; }
 }
 

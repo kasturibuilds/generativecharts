@@ -106,6 +106,7 @@ button, select { font: inherit; }
 .variation-example .ck-chart { box-shadow: none; display: flex; flex-direction: column; }
 .variation-example .ck-legend { margin-top: auto; }
 .variation-example > .copy-button { position: absolute; right: 18px; top: 18px; z-index: 4; }
+.variation-example:has(.ck-chart[data-theme^="mono-editorial-"]) > .copy-button { background: transparent; }
 .variation-example:has(.ck-chart[data-theme="airform-light"]) > .copy-button { background: rgba(240, 249, 255, .8); border-color: rgba(255, 255, 255, .9); color: #123b68; }
 .variation-example:has(.ck-chart[data-theme="airform-light"]) > .copy-button:hover { background: #fff; border-color: #9ac9ed; }
 .variation-example:has(.ck-chart[data-theme="airform-dark"]) > .copy-button { background: rgba(27, 63, 107, .8); border-color: rgba(164, 210, 255, .3); color: #e1f2ff; }
