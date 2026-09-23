@@ -13,7 +13,9 @@ for (const family of families) {
         await page.goto(`/?chart=${family}&theme=${theme}&mode=${mode}`);
         const chart = page.locator(".variation-example .ck-chart").first();
         await expect(chart).toBeVisible();
-        await page.waitForTimeout(100);
+        await expect(chart).toHaveAttribute("data-theme", `${theme}-${mode}`);
+        await page.evaluate(() => document.fonts.ready);
+        await expect.poll(() => chart.locator(".ck-svg").evaluate((svg) => Math.abs((svg as SVGSVGElement).viewBox.baseVal.width - svg.getBoundingClientRect().width))).toBeLessThan(1);
         await expect(chart).toHaveScreenshot(`${family}-${theme}-${mode}${width === 390 ? "-mobile" : ""}.png`, { animations: "disabled" });
       });
     }
@@ -28,6 +30,9 @@ for (const theme of themes) {
       await page.goto(`/?chart=pie&theme=${theme}&mode=${mode}`);
       const chart = page.locator(".variation-example .ck-chart").nth(2);
       await expect(chart).toBeVisible();
+      await expect(chart).toHaveAttribute("data-theme", `${theme}-${mode}`);
+      await page.evaluate(() => document.fonts.ready);
+      await expect.poll(() => chart.locator(".ck-svg").evaluate((svg) => Math.abs((svg as SVGSVGElement).viewBox.baseVal.width - svg.getBoundingClientRect().width))).toBeLessThan(1);
       await expect(chart).toHaveScreenshot(`extruded-pie-${theme}-${mode}.png`, { animations: "disabled" });
     });
   }
