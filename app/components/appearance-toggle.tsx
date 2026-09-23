@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ThemeIcon } from "./theme-icon";
 
 export function AppearanceToggle() {
-  const [appearance, setAppearance] = useState<"light" | "dark">("light");
+  const [appearance, setAppearance] = useState<"light" | "dark">("dark");
   useEffect(() => { const timer = window.setTimeout(() => setAppearance(document.documentElement.dataset.siteTheme === "dark" ? "dark" : "light"), 0); return () => window.clearTimeout(timer); }, []);
   function toggle() {
     const next = appearance === "light" ? "dark" : "light";

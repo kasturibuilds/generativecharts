@@ -8,7 +8,7 @@ test("theme taps replay chart entrance motion and respect reduced motion", async
   for (let tap = 0; tap < 2; tap++) {
     await chart.evaluate((node) => node.getAnimations({ subtree: true }).forEach((animation) => animation.finish()));
     await airform.click();
-    await expect(chart).toHaveAttribute("data-theme", "airform-light");
+    await expect(chart).toHaveAttribute("data-theme", "airform-dark");
     expect(await chart.evaluate((node) => node.getAnimations({ subtree: true }).some((animation) => animation.playState === "running"))).toBe(true);
   }
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -20,6 +20,21 @@ for (const width of [390, 1280]) {
   test(`theme previews select charts by keyboard at ${width}px`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(13, 14, 16)");
+    await expect(page.locator(".site-nav")).toHaveCSS("color", "rgb(244, 244, 245)");
+    await expect(page.locator(".control-label")).toHaveCount(0);
+    if (width > 620) {
+      for (const selector of [".family-tabs", ".theme-picker"]) {
+        const offset = await page.locator(selector).evaluate((row) => {
+          const bounds = row.getBoundingClientRect();
+          const items = [...row.children].map((item) => item.getBoundingClientRect());
+          const left = Math.min(...items.map((item) => item.left));
+          const right = Math.max(...items.map((item) => item.right));
+          return Math.abs((left + right) / 2 - (bounds.left + bounds.right) / 2);
+        });
+        expect(offset).toBeLessThan(1);
+      }
+    }
     const picker = page.getByRole("group", { name: "Chart theme" });
     await expect(picker.getByRole("button")).toHaveCount(3);
     for (const [name, id] of [["Mono Editorial", "mono-editorial"], ["Neon Instruments", "neon-instruments"], ["Airform", "airform"]]) {
@@ -27,13 +42,13 @@ for (const width of [390, 1280]) {
       await option.focus();
       await option.press("Enter");
       await expect(option).toHaveAttribute("aria-pressed", "true");
-      await expect(page.locator(".variation-example .ck-chart").first()).toHaveAttribute("data-theme", `${id}-light`);
+      await expect(page.locator(".variation-example .ck-chart").first()).toHaveAttribute("data-theme", `${id}-dark`);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     }
-    await page.screenshot({ path: testInfo.outputPath(`themes-light-${width}.png`), fullPage: true });
-    await page.getByRole("button", { name: "Switch to dark mode" }).click();
-    await expect(picker.locator('[data-preview-theme$="-dark"]')).toHaveCount(3);
-    await page.screenshot({ path: testInfo.outputPath(`themes-dark-${width}.png`), fullPage: true });
+    await page.screenshot({ path: testInfo.outputPath(`themes-initial-dark-${width}.png`), fullPage: true });
+    await page.getByRole("button", { name: "Switch to light mode" }).click();
+    await expect(picker.locator('[data-preview-theme$="-light"]')).toHaveCount(3);
+    await page.screenshot({ path: testInfo.outputPath(`themes-toggled-light-${width}.png`), fullPage: true });
   });
 }
 
@@ -43,8 +58,8 @@ test("catalog, themes, variations, code, and docs work", async ({ page }) => {
   await expect(page.getByRole("tab")).toHaveCount(18);
   await page.getByRole("button", { name: "Neon Instruments", exact: true }).click();
   await expect(page).toHaveURL(/theme=neon-instruments/);
-  await page.getByRole("button", { name: "Switch to dark mode" }).click();
-  await expect(page).toHaveURL(/mode=dark/);
+  await page.getByRole("button", { name: "Switch to light mode" }).click();
+  await expect(page).toHaveURL(/mode=light/);
   await page.getByRole("tab", { name: "Cohort", exact: true }).click();
   await expect(page.locator(".variation-example")).toHaveCount(1);
   await expect(page.locator(".ck-cohort-cell")).toHaveCount(21);

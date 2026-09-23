@@ -227,7 +227,7 @@ export function Gallery() {
   const [themeReplay, setThemeReplay] = useState(0);
   const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
   const [appearanceChoice, setAppearance] = useState<ChartAppearance | null>(requestedAppearance === "light" || requestedAppearance === "dark" ? requestedAppearance : null);
-  const appearance: ChartAppearance = appearanceChoice ?? (hydrated && document.documentElement.dataset.siteTheme === "dark" ? "dark" : "light");
+  const appearance: ChartAppearance = appearanceChoice ?? (hydrated && document.documentElement.dataset.siteTheme === "light" ? "light" : "dark");
   useEffect(() => {
     if (!hydrated) return;
     document.documentElement.dataset.siteTheme = appearance;
@@ -267,13 +267,11 @@ export function Gallery() {
     <section aria-label="Chart playground" className="playground shell" id="charts">
       <div className="gallery-toolbar">
         <div className="family-navigation">
-          <span className="control-label">Chart</span>
           <div aria-label="Chart type" className="family-tabs" role="tablist">
             {catalog.map((item, index) => <button aria-controls="chart-preview" aria-selected={selectedFamily === item.id} id={`chart-tab-${item.id}`} tabIndex={selectedFamily === item.id ? 0 : -1} key={item.id} onClick={() => selectChart(item.id)} onKeyDown={(event) => navigateTabs(event, index)} role="tab" type="button">{item.name}</button>)}
           </div>
         </div>
         <div className="theme-navigation">
-          <span className="control-label">Theme</span>
           <div aria-label="Chart theme" className="theme-picker" role="group">
         {themeList.map((item) => <button aria-label={item.name} aria-pressed={theme === item.id} className="theme-option" data-preview-theme={`${item.id}-${appearance}`} key={item.id} onClick={() => { setTheme(item.id as ThemeId); setThemeReplay((value) => value + 1); }} type="button">
           <span aria-hidden="true" className="theme-material" />

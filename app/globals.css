@@ -1,22 +1,5 @@
+/* Dark is the site-wide default, including before client hydration. */
 :root {
-  --site-bg: #f7f7f7;
-  --site-panel: #ffffff;
-  --site-text: #111111;
-  --site-muted: #696969;
-  --site-line: #e2e2e2;
-  --site-soft: #f5f6f8;
-  --site-selection: #dedbd2;
-  --site-caption: #9a9a9a;
-  --site-accent: #ef5b36;
-  --site-code: #171715;
-  --site-shadow: 0 22px 70px rgba(28, 27, 23, 0.12);
-}
-
-html:not([data-site-theme="dark"]):has(main[data-chart-theme="mono-editorial"]) {
-  --site-bg: #f7f7f2;
-}
-
-html[data-site-theme="dark"] {
   --site-bg: #0d0e10;
   --site-panel: #151619;
   --site-text: #f4f4f5;
@@ -31,8 +14,27 @@ html[data-site-theme="dark"] {
   color-scheme: dark;
 }
 
+html[data-site-theme="light"] {
+  --site-bg: #f7f7f7;
+  --site-panel: #ffffff;
+  --site-text: #111111;
+  --site-muted: #696969;
+  --site-line: #e2e2e2;
+  --site-soft: #f5f6f8;
+  --site-selection: #dedbd2;
+  --site-caption: #9a9a9a;
+  --site-accent: #ef5b36;
+  --site-code: #171715;
+  --site-shadow: 0 22px 70px rgba(28, 27, 23, 0.12);
+  color-scheme: light;
+}
+
+html[data-site-theme="light"]:has(main[data-chart-theme="mono-editorial"]) {
+  --site-bg: #f7f7f2;
+}
+
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { background: var(--site-bg); scroll-behavior: smooth; }
 body { background: var(--site-bg); color: var(--site-text); font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; }
 a { color: inherit; text-decoration: none; }
 button, select { font: inherit; }
@@ -80,15 +82,13 @@ button, select { font: inherit; }
 .playground { padding-bottom: 48px; scroll-margin-top: 20px; }
 .playground.shell { max-width: 1440px; }
 .gallery-toolbar { display: flex; flex-direction: column; gap: 12px; padding: 4px 0; }
-.family-navigation, .theme-navigation { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 8px; min-width: 0; }
-.family-navigation > .control-label, .theme-navigation > .control-label { padding-left: 4px; font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
-.control-label { color: var(--site-muted); display: block; font-size: 12px; font-weight: 760; letter-spacing: .12em; line-height: 1; text-transform: uppercase; }
-.family-tabs { display: flex; flex-wrap: wrap; gap: 2px; min-width: 0; }
+.family-navigation, .theme-navigation { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 8px; min-width: 0; }
+.family-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; min-width: 0; }
 .family-tabs::-webkit-scrollbar { display: none; }
 .family-tabs button { background: transparent; border: 0; border-radius: 9px; color: var(--site-muted); cursor: pointer; flex: 0 0 auto; font-size: 13px; font-weight: 550; padding: 9px 8px; position: relative; }
 .family-tabs button:hover { color: var(--site-text); }
 .family-tabs button[aria-selected="true"] { background: var(--site-selection); color: var(--site-text); }
-.theme-picker { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.theme-picker { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; min-width: 0; }
 .theme-option { align-items: center; background: transparent; border: 0; border-radius: 7px; color: var(--site-muted); cursor: pointer; display: flex; gap: 8px; min-width: 0; padding: 8px 10px; text-align: left; }
 .theme-option[aria-pressed="true"] { background: var(--site-selection); color: var(--site-text); }
 .theme-option:not([aria-pressed="true"]):hover { color: var(--site-text); }
@@ -173,8 +173,7 @@ button, select { font: inherit; }
   .catalog-hero > p:not(.eyebrow) { font-size: 15px; }
   .gallery-toolbar { border-left: 0; border-radius: 0; border-right: 0; margin-left: -17px; margin-right: -17px; padding-left: 17px; padding-right: 17px; }
   .family-navigation, .theme-navigation { grid-template-columns: minmax(0, 1fr); gap: 6px; }
-  .family-navigation > .control-label, .theme-navigation > .control-label { padding: 0 8px; }
-  .family-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; width: 100%; padding-bottom: 2px; }
+  .family-tabs { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; width: 100%; padding-bottom: 2px; }
   .playground { padding-bottom: 40px; }
   .variation-grid { gap: 26px; }
   .docs-card-grid { grid-template-columns: 1fr; }

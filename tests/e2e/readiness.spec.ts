@@ -40,16 +40,16 @@ for (const width of [390, 1280]) {
   }
 }
 
-test("saved dark mode hydrates and an explicit URL mode wins", async ({ page }) => {
+test("saved light mode hydrates and an explicit URL mode wins", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.addInitScript(() => localStorage.setItem("chartkit-site-theme", "dark"));
+  await page.addInitScript(() => localStorage.setItem("chartkit-site-theme", "light"));
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Switch to light mode" })).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("data-site-theme", "dark");
-  await page.goto("/?mode=light");
   await expect(page.getByRole("button", { name: "Switch to dark mode" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-site-theme", "light");
+  await page.goto("/?mode=dark");
+  await expect(page.getByRole("button", { name: "Switch to light mode" })).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("data-site-theme", "dark");
   expect(errors).toEqual([]);
 });
 
@@ -60,8 +60,9 @@ test("gallery works when persistent storage is unavailable", async ({ page }) =>
     Object.defineProperty(window, "localStorage", { get() { throw new DOMException("Blocked", "SecurityError"); } });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Switch to dark mode" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-site-theme", "dark");
+  await page.getByRole("button", { name: "Switch to light mode" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-site-theme", "light");
   expect(errors).toEqual([]);
 });
 
@@ -95,6 +96,7 @@ for (const width of [390, 1280]) {
   test(`documentation fits at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/docs/');
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(13, 14, 16)');
     await expect(page.getByRole('heading', {name: 'Install Generative Charts', exact: true})).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.screenshot({path: test.info().outputPath('docs.png'), fullPage: true});
