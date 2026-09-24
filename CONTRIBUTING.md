@@ -6,8 +6,10 @@ Read [DESIGN.md](./DESIGN.md) before making visual or interaction changes. It is
 
 ## Setup
 
+Use Node.js 22 and npm, matching CI. No credentials are needed to run the gallery.
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -16,9 +18,10 @@ npm run dev
 Before opening a pull request, run:
 
 ```bash
-npm test
-npm run lint
-npm run pack:package
+npm run release:check
+npm run build:site
+npx playwright install chromium
+CHARTKIT_TEST_STATIC=1 npm run test:e2e
 ```
 
 Visual changes must remain readable in all three themes in light and dark mode and preserve keyboard, server-rendering, and reduced-motion behavior.

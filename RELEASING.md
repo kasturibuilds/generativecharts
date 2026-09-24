@@ -28,7 +28,7 @@ npm run publish:package
 
 `publish:package` reruns the release checks before publishing the library workspace to the public npm registry. Complete any npm authentication or two-factor prompt locally. The name and version cannot be reused after publication. For subsequent releases, update the package version, lockfile, and changelog before repeating these steps.
 
-The current source repository is the private Sites repository. Local publication therefore does not request provenance. Once a public source repository and supported trusted publisher are configured, enable provenance in that CI release workflow. See [npm's provenance requirements](https://docs.npmjs.com/generating-provenance-statements/).
+The source repository is [kasturikhanke/generativecharts](https://github.com/kasturikhanke/generativecharts). Local publication does not request provenance. Once the repository is public and a supported trusted publisher is configured, enable provenance in that CI release workflow. See [npm's provenance requirements](https://docs.npmjs.com/generating-provenance-statements/).
 
 ## Verify publication
 
@@ -36,4 +36,4 @@ The current source repository is the private Sites repository. Local publication
 npm view generative-charts@0.1.0 version dist.integrity --registry=https://registry.npmjs.org
 ```
 
-Install that registry version in a fresh application, import `generative-charts/styles.css`, and render a chart. Only after the registry installation succeeds, remove the website's “Coming to npm” notice, update the workspace release status, and republish the Sites gallery. Package publication does not change the site's access policy.
+Install that registry version in a fresh application, import `generative-charts/styles.css`, and render a chart. After registry verification succeeds, update the release status and publish any accompanying gallery changes. Version `0.1.0` is already published. Package publication does not change the site's access policy.

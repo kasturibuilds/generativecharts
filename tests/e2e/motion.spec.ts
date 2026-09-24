@@ -20,6 +20,7 @@ for (const [family, selector] of Object.entries(families)) {
     const chart = page.locator(".variation-example .ck-chart").first();
     const mark = chart.locator(selector).first();
     await expect(chart).toBeVisible();
+    await page.locator('.theme-option[aria-pressed="true"]').click();
     await expect(mark).toBeAttached();
     await expect.poll(() => mark.evaluate((node) => getComputedStyle(node).animationName)).not.toBe("none");
     // Seek the actual CSS animation, avoiding timing-dependent screenshots.

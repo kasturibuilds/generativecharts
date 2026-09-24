@@ -18,7 +18,7 @@ jobs:
       - run: npm run pack:package
       - run: npm run build:site
       - run: npx playwright install --with-deps chromium
-      - run: CHARTKIT_TEST_STATIC=1 npm run test:e2e -- tests/e2e/gallery.spec.ts tests/e2e/readiness.spec.ts tests/e2e/page-loading.spec.ts
+      - run: CHARTKIT_TEST_STATIC=1 npm run test:e2e -- tests/e2e/gallery.spec.ts tests/e2e/readiness.spec.ts tests/e2e/page-loading.spec.ts tests/e2e/motion.spec.ts
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

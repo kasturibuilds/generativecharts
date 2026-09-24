@@ -83,12 +83,13 @@ test("gallery works when persistent storage is unavailable", async ({ page }) =>
 
 test("chart tabs support arrow keys and Home/End", async ({ page }) => {
   await page.goto("/");
+  const lastTab = page.getByRole("tab").last();
   await page.getByRole("tab", { name: "Bar", exact: true }).press("ArrowRight");
   await expect(page.getByRole("tab", { name: "Line", exact: true })).toBeFocused();
   await expect(page.getByRole("tabpanel")).toHaveAccessibleName("Line");
   await page.getByRole("tab", { name: "Line", exact: true }).press("End");
-  await expect(page.getByRole("tab", { name: "3D terrain", exact: true })).toBeFocused();
-  await page.getByRole("tab", { name: "3D terrain", exact: true }).press("Home");
+  await expect(lastTab).toBeFocused();
+  await lastTab.press("Home");
   await expect(page.getByRole("tab", { name: "Bar", exact: true })).toBeFocused();
 });
 

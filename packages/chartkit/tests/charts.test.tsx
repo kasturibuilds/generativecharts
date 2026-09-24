@@ -51,6 +51,29 @@ describe("Generative Charts", () => {
     expect(container.querySelector(".ck-radial-center-kicker")).toHaveTextContent("A");
   });
 
+  it("keeps zero progress visible and inspectable in radial gauges and rings", () => {
+    const onDatumClick = vi.fn();
+    const data = [{ name: "Started", value: 0 }, { name: "Complete", value: 40 }];
+    const gauge = render(<RadialChart data={data.slice(0, 1)} maxValue={100} nameKey="name" onDatumClick={onDatumClick} valueFormatter={(value) => `${value}%`} valueKey="value" variant="gauge" />);
+
+    expect(gauge.container.querySelector(".ck-empty")).toBeNull();
+    expect(gauge.container.querySelector(".ck-radial-center")).toHaveTextContent("0");
+    expect(gauge.container.querySelectorAll(".ck-radial-value")).toHaveLength(0);
+    const zeroTrack = screen.getByRole("button", { name: "Started · Value: 0%" });
+    expect(zeroTrack).toHaveClass("ck-radial-track");
+    fireEvent.focus(zeroTrack);
+    expect(screen.getByRole("status")).toHaveTextContent("Started · Value: 0%");
+    fireEvent.keyDown(zeroTrack, { key: "Enter" });
+    expect(onDatumClick).toHaveBeenCalledWith(data[0], { dataKey: "value", label: "Value" });
+
+    gauge.unmount();
+    const rings = render(<RadialChart data={data} maxValue={100} nameKey="name" valueKey="value" variant="rings" />);
+    expect(rings.container.querySelectorAll(".ck-radial-track")).toHaveLength(2);
+    expect(rings.container.querySelectorAll(".ck-radial-value")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Started · Value: 0" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Complete · Value: 40" })).toBeInTheDocument();
+  });
+
   it("uses ink-density patterns for a mono heatmap", () => {
     const data = rows.map((row) => ({ ...row, day: "Week" }));
     const { container } = render(<HeatmapChart data={data} xKey="label" yKey="day" valueKey="one" theme="mono-editorial" />);
@@ -102,6 +125,45 @@ describe("Generative Charts", () => {
     expect(container.querySelectorAll(".ck-sankey-link-underlay")).toHaveLength(3);
     expect(container.querySelectorAll(".ck-sankey-label")).toHaveLength(4);
     expect(container.querySelectorAll(".ck-sankey-node-value")).toHaveLength(4);
+  });
+
+  it("renders equal-weight treemap peers without recursive partition failure", () => {
+    const data = ["Alpha", "Beta", "Gamma", "Delta"].map((name) => ({ name, value: 25 }));
+    const { container } = render(<TreemapChart animate={false} data={data} nameKey="name" valueKey="value" />);
+    const tiles = [...container.querySelectorAll(".ck-treemap-tile")];
+
+    expect(tiles).toHaveLength(data.length);
+    expect(tiles.every((tile) => Number(tile.getAttribute("width")) > 0)).toBe(true);
+    expect(tiles.every((tile) => Number(tile.getAttribute("height")) > 0)).toBe(true);
+    expect(screen.getByRole("button", { name: "Alpha · Value: 25" })).toBeInTheDocument();
+  });
+
+  it.each([
+    [3.8, 3],
+    [0, 3],
+    [24.8, 24],
+    [Number.NaN, 8],
+    [Number.POSITIVE_INFINITY, 8],
+  ])("normalizes histogram bin count %s to %i", (requested, expected) => {
+    const data = [{ value: 0 }, { value: 12 }, { value: 24 }];
+    const { container } = render(<HistogramChart bins={requested} data={data} valueKey="value" />);
+    const bars = [...container.querySelectorAll(".ck-histogram-bar")];
+
+    expect(bars).toHaveLength(expected);
+    expect(bars.every((bar) => bar.hasAttribute("x") && Number.isFinite(Number(bar.getAttribute("x"))))).toBe(true);
+    expect(bars.reduce((sum, bar) => sum + Number(bar.getAttribute("aria-label")?.match(/Frequency: (\d+)$/)?.[1] ?? 0), 0)).toBe(data.length);
+  });
+
+  it("does not fabricate datum interaction for empty histogram bins", () => {
+    const onDatumClick = vi.fn();
+    const data = [{ value: 0 }, { value: 100 }];
+    const { container } = render(<HistogramChart bins={3} data={data} onDatumClick={onDatumClick} valueKey="value" />);
+    const bars = [...container.querySelectorAll<SVGRectElement>(".ck-histogram-bar")];
+
+    expect(bars[1]).toHaveAttribute("aria-hidden", "true");
+    expect(bars[1]).not.toHaveAttribute("tabindex");
+    fireEvent.click(bars[1]);
+    expect(onDatumClick).not.toHaveBeenCalled();
   });
 
   it("supports keyboard tooltips and activation", () => {
@@ -193,6 +255,7 @@ describe("Generative Charts", () => {
     const marks = [...container.querySelectorAll(".ck-ranked-bar")];
     expect(marks.length).toBe(rows.length);
     expect(marks.every((mark) => mark.getAttribute("height") === "24")).toBe(true);
+    expect(marks.every((mark) => mark.getAttribute("fill") === "transparent")).toBe(true);
   });
 
   it("adds directional motion hooks and honors the animation opt-out", () => {
@@ -249,11 +312,31 @@ describe("Generative Charts", () => {
     const { container } = render(<LineChart data={rows} onActiveIndexChange={onActiveIndexChange} xKey="label" series={[...series]} />);
     const targets = [...container.querySelectorAll<SVGRectElement>(".ck-comparison-target")];
     expect(targets.map((target) => target.tabIndex)).toEqual([0, -1, -1]);
+    expect(targets.every((target) => Number(target.getAttribute("width")) >= 24)).toBe(true);
     fireEvent.focus(targets[0]);
     expect(screen.getByRole("status")).toHaveTextContent("One");
     expect(screen.getByRole("status")).toHaveTextContent("Two");
     fireEvent.keyDown(targets[0], { key: "ArrowRight" });
     expect(onActiveIndexChange).toHaveBeenLastCalledWith(1);
+  });
+
+  it("ignores pointer inspection when Cartesian positions are all invalid", () => {
+    const invalid = [{ x: "bad", one: 8, two: 5 }, { x: null, one: 12, two: 9 }];
+    const line = render(<LineChart data={invalid} xKey="x" xScale={{ type: "linear" }} series={[series[0]]} />);
+    expect(() => fireEvent.pointerMove(line.container.querySelector(".ck-svg")!, { clientX: 100, pointerType: "mouse" })).not.toThrow();
+    line.unmount();
+
+    const combo = render(<ComboChart data={invalid} xKey="x" xScale={{ type: "linear" }} series={[...series]} />);
+    expect(() => fireEvent.pointerMove(combo.container.querySelector(".ck-svg")!, { clientX: 100, pointerType: "mouse" })).not.toThrow();
+  });
+
+  it("keeps dense combo comparison targets at least 24px wide", () => {
+    const data = Array.from({ length: 50 }, (_, x) => ({ x, one: x, two: x + 1 }));
+    const { container } = render(<ComboChart data={data} xKey="x" xScale={{ type: "linear" }} series={[...series]} />);
+    const targets = [...container.querySelectorAll<SVGRectElement>(".ck-comparison-target")];
+
+    expect(targets).toHaveLength(data.length);
+    expect(targets.every((target) => Number(target.getAttribute("width")) >= 24)).toBe(true);
   });
 
   it("reports structured diagnostics for invalid values and x positions", async () => {

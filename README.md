@@ -1,16 +1,45 @@
 # Generative Charts
 
-Generative Charts is a React chart library and product website inspired by the ergonomics of Generative Loaders. It combines eighteen accessible SVG chart families with three polished themes and universal light and dark modes.
+Accessible React charts with eighteen chart families, three themes, and light and dark modes.
 
-The publishable package is in `packages/chartkit`; the gallery and documentation use its public workspace exports.
+[Gallery](https://generativecharts.com) · [Documentation](https://generativecharts.com/docs) · [npm](https://www.npmjs.com/package/generative-charts)
 
-The visual quality bar and chart-family rules are defined in [DESIGN.md](./DESIGN.md). New chart work should satisfy that contract before visual baselines are refreshed.
+## Use the library
 
 ```bash
-npm install
+npm install generative-charts
+```
+
+Import `generative-charts/styles.css` once at your application root. See the [package README](packages/chartkit/README.md) for usage, components, and compatibility. The published package supports React 18 and React 19.
+
+## Run locally
+
+Use Node.js 22 and npm, matching CI.
+
+```bash
+git clone https://github.com/kasturikhanke/generativecharts.git
+cd generativecharts
+npm ci
 npm run dev
 ```
 
-Open `http://localhost:3000` for the gallery and `/docs` for documentation.
+Open `http://localhost:3000` for the gallery and `/docs` for documentation. No API keys or environment variables are required for local development.
 
-The public npm package name is `generative-charts`. Publication is pending.
+The library lives in `packages/chartkit`; the Next.js gallery and documentation live in `app` and use the library's public workspace exports.
+
+## Validate changes
+
+```bash
+npm run release:check
+npm run build:site
+npx playwright install chromium
+CHARTKIT_TEST_STATIC=1 npm run test:e2e
+```
+
+Visual baselines are maintained on macOS. Read [CONTRIBUTING.md](CONTRIBUTING.md) for development guidance and [DESIGN.md](DESIGN.md) before visual changes. Complete its page and gallery review before refreshing screenshots.
+
+See [RELEASING.md](RELEASING.md) for package releases and [RELEASE_READINESS.md](RELEASE_READINESS.md) for validation status.
+
+## License
+
+[MIT](LICENSE) © 2026 Kasturi Khanke.

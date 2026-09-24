@@ -7,6 +7,8 @@
 - Added shared multi-series comparison tooltips, nearest-x pointer/touch tracking, roving keyboard focus, and controlled active-index callbacks to line, area, and combo charts.
 - Added measured compact, standard, and wide container layouts with denser responsive behavior for axes, labels, legends, and figure metadata.
 - Reworked all dark theme modes for stronger contrast, focus visibility, tooltip clarity, and sequential color floors.
+- Fixed equal-weight treemap partitioning, zero-value radial rendering, non-finite histogram bin counts, and empty comparison-pointer candidate handling.
+- Kept comparison inspection targets at least 24px wide and prevented empty histogram bins from fabricating datum interactions.
 
 ## 0.1.0
 

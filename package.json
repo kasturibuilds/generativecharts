@@ -38,16 +38,25 @@
     "@types/node": "^22.19.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^5.1.0",
+    "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.3.3",
-    "jsdom": "^27.0.0",
+    "jsdom": "26.1.0",
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.50.0",
-    "vite": "^7.2.0",
-    "vitest": "^4.0.0"
+    "vite": "^6.4.3",
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=20"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kasturikhanke/generativecharts.git"
+  },
+  "homepage": "https://generativecharts.com",
+  "bugs": {
+    "url": "https://github.com/kasturikhanke/generativecharts/issues"
   }
 }

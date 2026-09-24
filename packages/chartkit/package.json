@@ -65,5 +65,14 @@
     "typescript",
     "svg",
     "accessible"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kasturikhanke/generativecharts.git",
+    "directory": "packages/chartkit"
+  },
+  "homepage": "https://generativecharts.com",
+  "bugs": {
+    "url": "https://github.com/kasturikhanke/generativecharts/issues"
+  }
 }
