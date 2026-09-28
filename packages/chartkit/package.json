@@ -1,6 +1,6 @@
 {
   "name": "generative-charts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Polished, accessible React charts with expressive themes.",
   "type": "module",
   "sideEffects": [
@@ -74,5 +74,9 @@
   "homepage": "https://generativecharts.com",
   "bugs": {
     "url": "https://github.com/kasturikhanke/generativecharts/issues"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/kasturikhanke"
   }
 }
