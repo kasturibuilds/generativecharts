@@ -36,4 +36,4 @@ The source repository is [kasturikhanke/generativecharts](https://github.com/kas
 npm view generative-charts@0.2.0 version dist.integrity --registry=https://registry.npmjs.org
 ```
 
-Install that registry version in a fresh application, import `generative-charts/styles.css`, and render a chart. After registry verification succeeds, update the release status and publish any accompanying gallery changes. Version `0.1.0` is already published; `0.2.0` is the prepared public launch release. Package publication does not change the site's access policy.
+Install that registry version in a fresh application, import `generative-charts/styles.css`, and render a chart. After registry verification succeeds, update the release status and publish any accompanying gallery changes. Versions `0.1.0` and `0.2.0` are published; `0.2.0` is the public launch release. Package publication does not change the site's access policy.
