@@ -2,7 +2,7 @@
 
 Polished, accessible React charts with eighteen useful chart families, three themes, and universal light and dark modes.
 
-[Gallery](https://generativecharts.com) · [Documentation](https://generativecharts.com/docs) · [GitHub](https://github.com/kasturikhanke/generativecharts) · [Sponsor](https://github.com/sponsors/kasturikhanke)
+[Gallery](https://generativecharts.com) · [Documentation](https://generativecharts.com/docs) · [GitHub](https://github.com/kasturikhanke/generativecharts) · [Sponsor](https://github.com/sponsors/kasturibuilds)
 
 ## Install
 

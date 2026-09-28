@@ -31,7 +31,7 @@ import {
 } from "generative-charts";
 import { INSTALL_COMMAND, PACKAGE_NAME } from "../lib/package";
 
-const SPONSORS_URL = "https://github.com/sponsors/kasturikhanke";
+const SPONSORS_URL = "https://github.com/sponsors/kasturibuilds";
 
 type Family = "bar" | "line" | "area" | "scatter" | "pie" | "radar" | "radial" | "heatmap" | "cohort" | "funnel" | "sankey" | "treemap" | "waterfall" | "combo" | "histogram" | "boxplot" | "choropleth" | "terrain";
 type Variation = { id: string; name: string; use: string };
