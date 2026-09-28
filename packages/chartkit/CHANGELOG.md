@@ -6,7 +6,7 @@ Public launch release.
 
 ### Migration from 0.1.0
 
-Missing measurements are no longer treated as zero by default. Use `missingValueStrategy="zero"` to preserve explicit zero imputation. Numeric x-values now infer a linear axis; use `xScale={{ type: "categorical" }}` when those numbers are category labels.
+Missing measurements are no longer treated as zero by default. Use `missingValueStrategy="zero"` to preserve explicit zero imputation. Numeric x-values now infer a linear axis; use `xScale={{ type: "category" }}` when those numbers are category labels.
 
 ### Changes
 
