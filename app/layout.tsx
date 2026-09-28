@@ -1,3 +1,4 @@
+import { AnalyticsBeacon } from "./components/analytics-beacon";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SITE_URL } from "./lib/site";
@@ -16,5 +17,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" data-site-theme="dark" data-scroll-behavior="smooth" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: `(function(){var t='dark';try{var saved=localStorage.getItem('chartkit-site-theme');if(location.pathname!=='/'&&(saved==='light'||saved==='dark'))t=saved}catch(e){}var mode=new URLSearchParams(location.search).get('mode');if(mode==='light'||mode==='dark')t=mode;document.documentElement.dataset.siteTheme=t;document.documentElement.style.colorScheme=t})()` }} /></head><body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body></html>;
+  return <html lang="en" data-site-theme="dark" data-scroll-behavior="smooth" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: `(function(){var t='dark';try{var saved=localStorage.getItem('chartkit-site-theme');if(location.pathname!=='/'&&(saved==='light'||saved==='dark'))t=saved}catch(e){}var mode=new URLSearchParams(location.search).get('mode');if(mode==='light'||mode==='dark')t=mode;document.documentElement.dataset.siteTheme=t;document.documentElement.style.colorScheme=t})()` }} /></head><body className={`${geistSans.variable} ${geistMono.variable}`}><AnalyticsBeacon />{children}</body></html>;
 }

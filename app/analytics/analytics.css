@@ -1,0 +1,47 @@
+.analytics-content { padding-top: 48px; padding-bottom: 64px; }
+.analytics-heading, .analytics-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.analytics-heading h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 550; letter-spacing: -.045em; margin: 8px 0 0; }
+.analytics-muted, .analytics-notes, .analytics-section-heading > span { color: var(--site-muted); font-size: 14px; line-height: 1.65; }
+.analytics-heading p { margin: 0; }
+.analytics-controls { display: flex; align-items: center; gap: 12px; }
+.analytics-controls label { color: var(--site-muted); display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.analytics-page button:not(.theme-toggle), .analytics-page select { background: var(--site-panel); border: 1px solid var(--site-line); border-radius: 7px; color: var(--site-text); font: inherit; font-size: 14px; min-height: 40px; padding: 8px 12px; cursor: pointer; }
+.analytics-page :is(a, button, select):focus-visible { outline: 2px solid var(--site-text); outline-offset: 3px; }
+.analytics-signout { font-size: 14px; padding: 8px; }
+.analytics-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; padding: 32px 0; margin: 32px 0 0; border-block: 1px solid var(--site-line); }
+.analytics-summary dt { font-size: 14px; color: var(--site-muted); }
+.analytics-summary dd { margin: 12px 0 0; font-size: clamp(26px, 4vw, 42px); letter-spacing: -.035em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.analytics-section { min-width: 0; padding-block: 28px; }
+.analytics-section h2 { font-size: 18px; font-weight: 550; margin: 0 0 20px; }
+.analytics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 56px; }
+.analytics-grid > section { border-top: 1px solid var(--site-line); }
+.analytics-ranking { list-style: none; margin: 0; padding: 0; display: grid; gap: 15px; }
+.analytics-ranking li { display: grid; grid-template-columns: minmax(0, 1fr) 72px auto; align-items: center; gap: 14px; font-size: 14px; }
+.analytics-ranking li > span:first-child { overflow-wrap: anywhere; }
+.analytics-ranking strong { min-width: 28px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+.analytics-meter { display: block; height: 8px; }
+.analytics-meter i { display: block; height: 100%; border: 1px solid var(--site-text); background: transparent; }
+.analytics-table-scroll { overflow: auto; max-height: 320px; }
+.analytics-traffic table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+.analytics-traffic th, .analytics-traffic td { text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--site-line); font-weight: 400; }
+.analytics-traffic th:first-child { text-align: left; padding-left: 0; }
+.analytics-traffic thead th { color: var(--site-muted); background: var(--site-bg); position: sticky; top: 0; }
+.analytics-table-bar { width: 30%; }
+.analytics-table-bar span { display: block; height: 12px; border: 1px solid var(--site-text); background: transparent; }
+.analytics-table-bar span[style="width:0%"], .analytics-table-bar span[style="width: 0%;"] { border: 0; }
+.analytics-download-total { font-size: 32px; margin: 0; }
+.analytics-download-total span { font-size: 16px; color: var(--site-muted); }
+.analytics-section > a { display: inline-block; margin-top: 10px; text-decoration: underline; font-size: 14px; }
+.analytics-notes { border-top: 1px solid var(--site-line); padding-top: 20px; max-width: 850px; }
+.analytics-notice { margin-block: 32px; font-size: 16px; }
+.analytics-notice a { text-decoration: underline; }
+.analytics-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 700px) {
+  .analytics-heading { align-items: flex-start; flex-direction: column; }
+  .analytics-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .analytics-grid { grid-template-columns: 1fr; }
+  .analytics-section-heading { display: block; }
+  .analytics-section-heading > span { display: block; margin-bottom: 12px; }
+  .analytics-content { padding-top: 28px; }
+  .analytics-table-bar, .analytics-bar-heading { display: none; }
+}

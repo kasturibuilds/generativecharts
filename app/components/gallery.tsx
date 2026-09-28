@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore, type MouseEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { GitHubButton } from "./github-button";
+import { track } from "../lib/analytics";
 import { Brand } from "./brand";
 import { ThemeIcon } from "./theme-icon";
 import {
@@ -123,7 +124,7 @@ function isFamily(value: string | null): value is Family {
   return catalog.some((item) => item.id === value);
 }
 
-function CopyButton({ value, label = "Copy", iconOnly = false, stopPropagation = false }: { value: string; label?: string; iconOnly?: boolean; stopPropagation?: boolean }) {
+function CopyButton({ value, label = "Copy", iconOnly = false, stopPropagation = false, family }: { value: string; label?: string; iconOnly?: boolean; stopPropagation?: boolean; family?: Family }) {
   const [copied, setCopied] = useState(false);
   async function copy(event: MouseEvent<HTMLButtonElement>) {
     if (stopPropagation) event.stopPropagation();
@@ -136,9 +137,12 @@ function CopyButton({ value, label = "Copy", iconOnly = false, stopPropagation =
       textarea.style.opacity = "0";
       document.body.appendChild(textarea);
       textarea.select();
-      document.execCommand("copy");
-      textarea.remove();
+      let success = false;
+      try { success = document.execCommand("copy"); } finally { textarea.remove(); }
+      if (!success) return;
     }
+    if (value === INSTALL_COMMAND) track("install_copy");
+    else if (family) track("code_copy", family);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1400);
   }
@@ -253,6 +257,7 @@ export function Gallery() {
   }, [appearance, hydrated, selectedFamily, theme]);
 
   function selectChart(family: Family) {
+    if (family !== selectedFamily) track("chart_select", family);
     setSelectedFamily(family);
     setThemeReplay((value) => value + 1);
   }
@@ -269,7 +274,7 @@ export function Gallery() {
     <nav className="site-nav shell">
       <Brand />
       <div className="nav-links"><a href="#charts">Charts</a><Link href="/docs">Docs</Link><a href={SPONSORS_URL}>Sponsor ↗</a></div>
-      <div className="nav-actions"><GitHubButton compact /><button aria-label={`Switch to ${appearance === "light" ? "dark" : "light"} mode`} className="theme-toggle" onClick={() => { setAppearance(appearance === "light" ? "dark" : "light"); setThemeReplay((value) => value + 1); }} type="button"><ThemeIcon appearance={appearance} /></button><Link className="nav-install nav-docs-mobile" href="/docs">Docs <span>↗</span></Link></div>
+      <div className="nav-actions"><GitHubButton compact /><button aria-label={`Switch to ${appearance === "light" ? "dark" : "light"} mode`} className="theme-toggle" onClick={() => { track("appearance_select", appearance === "light" ? "dark" : "light"); setAppearance(appearance === "light" ? "dark" : "light"); setThemeReplay((value) => value + 1); }} type="button"><ThemeIcon appearance={appearance} /></button><Link className="nav-install nav-docs-mobile" href="/docs">Docs <span>↗</span></Link></div>
     </nav>
 
     <header className="catalog-hero shell">
@@ -286,7 +291,7 @@ export function Gallery() {
         </div>
         <div className="theme-navigation">
           <div aria-label="Chart theme" className="theme-picker" role="group">
-        {themeList.map((item) => <button aria-label={item.name} aria-pressed={theme === item.id} className="theme-option" data-preview-theme={`${item.id}-${appearance}`} key={item.id} onClick={() => { setTheme(item.id as ThemeId); setThemeReplay((value) => value + 1); }} type="button">
+        {themeList.map((item) => <button aria-label={item.name} aria-pressed={theme === item.id} className="theme-option" data-preview-theme={`${item.id}-${appearance}`} key={item.id} onClick={() => { if (theme !== item.id) track("theme_select", item.id); setTheme(item.id as ThemeId); setThemeReplay((value) => value + 1); }} type="button">
           <span aria-hidden="true" className="theme-material" />
           <span className="theme-option-copy"><span className="theme-option-name">{item.name}</span></span>
         </button>)}
@@ -296,7 +301,7 @@ export function Gallery() {
 
       <div aria-labelledby={`chart-tab-${selectedFamily}`} className="variation-grid" id="chart-preview" role="tabpanel">
         {variations[selectedFamily].map((item) => <article className="variation-example" key={`${selectedFamily}-${item.id}`}>
-          <CopyButton iconOnly label="Copy code" value={chartCode(selectedFamily, item.id, theme, appearance)} />
+          <CopyButton family={selectedFamily} iconOnly label="Copy code" value={chartCode(selectedFamily, item.id, theme, appearance)} />
           <ChartPreview key={`${theme}-${appearance}-${themeReplay}`} animate={themeReplay > 0} appearance={appearance} family={selectedFamily} height={340} showLegend theme={theme} variation={item.id} />
         </article>)}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { track } from "../lib/analytics";
 import { ThemeIcon } from "./theme-icon";
 
 export function AppearanceToggle() {
@@ -8,6 +9,7 @@ export function AppearanceToggle() {
   useEffect(() => { const timer = window.setTimeout(() => setAppearance(document.documentElement.dataset.siteTheme === "dark" ? "dark" : "light"), 0); return () => window.clearTimeout(timer); }, []);
   function toggle() {
     const next = appearance === "light" ? "dark" : "light";
+    track("appearance_select", next);
     setAppearance(next);
     document.documentElement.dataset.siteTheme = next;
     document.documentElement.style.colorScheme = next;

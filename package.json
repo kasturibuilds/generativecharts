@@ -8,10 +8,10 @@
   ],
   "scripts": {
     "dev": "npm run build:package && next dev",
-    "start": "next start",
+    "start": "node scripts/serve-static.mjs",
     "build:package": "npm run build --workspace generative-charts",
-    "build": "npm run build:package && next build",
-    "build:site": "npm run build:package && CHARTKIT_STATIC_EXPORT=1 next build",
+    "build": "npm run build:package && CHARTKIT_STATIC_EXPORT=1 next build && node scripts/build-worker.mjs",
+    "build:site": "npm run build",
     "start:site": "node scripts/serve-static.mjs",
     "typecheck": "tsc --noEmit && npm run typecheck --workspace generative-charts",
     "lint": "eslint . --ignore-pattern packages/chartkit/dist --ignore-pattern .next",
@@ -22,7 +22,10 @@
     "pack:package": "npm_config_cache=/tmp/chartkit-npm-cache npm pack --workspace generative-charts --dry-run",
     "release:check": "npm run lint && npm run build:package && npm run typecheck && npm run test:unit && npm run test:consumers && npm run pack:package",
     "pack:release": "npm pack --workspace generative-charts",
-    "publish:package": "npm run release:check && npm publish --workspace generative-charts"
+    "publish:package": "npm run release:check && npm publish --workspace generative-charts",
+    "db:generate": "drizzle-kit generate",
+    "test:analytics": "node --experimental-sqlite node_modules/vitest/vitest.mjs run --config vitest.analytics.config.ts",
+    "start:analytics": "node --experimental-sqlite scripts/preview-analytics.mjs"
   },
   "dependencies": {
     "generative-charts": "workspace:*",
@@ -45,7 +48,10 @@
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.50.0",
     "vite": "^6.4.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "drizzle-orm": "0.45.2",
+    "drizzle-kit": "0.31.11",
+    "esbuild": "^0.25.12"
   },
   "engines": {
     "node": ">=20"
