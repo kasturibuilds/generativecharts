@@ -58,5 +58,9 @@
   "homepage": "https://generativecharts.com",
   "bugs": {
     "url": "https://github.com/kasturikhanke/generativecharts/issues"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/kasturikhanke"
   }
 }

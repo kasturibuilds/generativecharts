@@ -1,23 +1,34 @@
 # Launch readiness
 
-Updated 2026-09-24. The npm registry confirms `generative-charts@0.1.0` is published. This review covers the local working tree; hosted CI must pass for the commit being made public.
+Launched 2026-09-28. `generative-charts@0.2.0` is published on npm, the GitHub repository is public, and the updated website is live at https://generativecharts.com.
 
-## Repository cleanup
+## Validated
 
-- A root MIT license now covers the repository, matching the library license.
-- The README links to the gallery, documentation, npm package, contribution guide, and release instructions.
-- Package metadata includes the source repository, homepage, and issue tracker.
-- Development instructions use Node.js 22 and `npm ci`, matching CI.
-- CI includes the existing motion tests alongside gallery, readiness, and page-loading tests; visual tests run separately on macOS.
-- A credential-pattern scan of 110 locally available commits and 1,226 unique blobs found no matches or sensitive credential filenames. This is a limited pattern scan, not a comprehensive security audit.
+- `npm run release:check` passed: lint, application/library TypeScript, 44 unit tests, packed consumer compatibility, and package contents.
+- `npm run build:site` passed.
+- All 302 Playwright checks passed against the production static export, covering eighteen chart families, all three themes, light/dark modes, desktop/mobile, keyboard interaction, page loading, motion, and visual regression. No baselines were refreshed.
+- React 18 and React 19 consumer checks passed, including SSR, strict NodeNext/Bundler TypeScript resolution, CSS exports, source maps, and preserved client directives. These checks were repeated for the 0.2.0 candidate after updating package metadata.
+- `npm audit` reported zero vulnerabilities, including development dependencies.
+- Anonymous requests to the homepage, documentation, robots.txt, sitemap.xml, and social image returned HTTP 200.
+- Both GitHub CI runs passed for release candidate `46dbd2535283fcfc9f91a898ad403bdc9a4040f6`. PR #1 was merged as `850a6d6c967697957fd131461aecdbc97cddb16e` without changing the tested source tree.
+- A scan of 117 reachable commits and 1,494 blobs found no common credential-pattern matches. This is a limited pattern scan, not a comprehensive security audit.
 
-## Local validation
+## Launch preparation
 
-- `npm run release:check` passed: lint, package build, application/library TypeScript checks, all 44 unit tests, consumer compatibility, and package contents.
-- Packed-library consumer checks passed with React 18 and React 19, strict NodeNext/Bundler TypeScript resolution, CSS exports, source maps, and client component boundaries.
-- `npm run build:site` passed and exported the gallery, documentation, social metadata routes, and icons.
-- `npm audit` reported zero vulnerabilities.
-- All 302 Playwright checks passed against the static export, including gallery, readiness, page loading, motion, and visual regression coverage. No baselines were refreshed by this cleanup.
+- MIT licensing, contribution instructions, package exports, issue tracker metadata, and public documentation are present.
+- GitHub Sponsors is linked from the gallery navigation and mobile-accessible footer, repository/package READMEs, npm funding metadata, and `.github/FUNDING.yml`.
+- The repository About section points to `https://generativecharts.com` and includes React, TypeScript, charts, SVG, accessibility, and data-visualization topics.
+- Version 0.2.0 and its lockfile are prepared. The changelog documents missing-value and numeric-axis migration from 0.1.0.
+
+## Publication verified
+
+- [PR #1](https://github.com/kasturikhanke/generativecharts/pull/1) is merged, and anonymous GitHub repository access returns HTTP 200.
+- npm `latest` is `0.2.0`. Its registry tarball SHA-1 is `d1173deec9c69617675e44a86745531c91d0e328`, matching the validated local package.
+- A fresh registry installation passed stylesheet-export and BarChart/LineChart server-rendering checks.
+- [GitHub release v0.2.0](https://github.com/kasturikhanke/generativecharts/releases/tag/v0.2.0) is published and anonymously accessible.
+- Sites version 11 successfully deployed commit `850a6d6c967697957fd131461aecdbc97cddb16e`, including the Sponsors links. The public custom domain remains `https://generativecharts.com`.
+
+The release was prepared in an isolated checkout. Concurrent, uncommitted chart-renderer edits in the original shared checkout were not included.
 
 ## Reproduce validation
 
@@ -26,16 +37,8 @@ npm ci
 npm run release:check
 npm run build:site
 npx playwright install chromium
-CHARTKIT_TEST_STATIC=1 npm run test:e2e
+CHARTKIT_TEST_STATIC=1 CHARTKIT_TEST_PORT=3101 npm run test:e2e
 npm audit
 ```
 
-Visual baselines are maintained on macOS. Follow the page and gallery review in [DESIGN.md](DESIGN.md) before updating them. Screenshot tests compare against recorded decisions; passing them does not replace design review.
-
-## Before making the repository public
-
-- Review and commit the pending chart fixes, tests, visual baselines, and repository cleanup, then verify hosted CI for that commit.
-- Confirm the intended GitHub visibility and repository settings in GitHub. This local review did not verify authenticated settings or hosted CI results.
-- Verify anonymous access to the gallery and documentation. The configured domain is `https://generativecharts.com`; requests from this review environment returned HTTP 403, so public access was not verified.
-
-The published npm version remains `0.1.0`. The working tree includes unreleased changes; choose a new version before the next npm publication. See [RELEASING.md](RELEASING.md).
+Visual baselines are maintained on macOS. Follow the page and gallery review in [DESIGN.md](DESIGN.md) before updating them. See [RELEASING.md](RELEASING.md) for package publication.
