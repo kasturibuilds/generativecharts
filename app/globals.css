@@ -41,19 +41,26 @@ button, select { font: inherit; }
 .shell { margin: 0 auto; max-width: 1180px; padding-left: 24px; padding-right: 24px; }
 
 .site-nav { align-items: center; display: grid; grid-template-columns: 1fr auto 1fr; height: 72px; }
-.site-nav.shell, .footer-editorial-inner.shell { max-width: none; padding-left: 0; padding-right: 0; width: min(100% - 40px, 1160px); }
+.site-nav.shell, .footer-editorial-meta.shell { max-width: none; padding-left: 0; padding-right: 0; width: min(100% - 40px, 1160px); }
 .brand { align-items: center; display: flex; font-size: 12px; font-weight: 650; gap: 10px; letter-spacing: -.02em; }
 .brand-mark { color: var(--site-text); display: block; height: 25px; overflow: visible; width: 25px; }
-.brand-mark-dot { animation: brand-dot-form 80ms cubic-bezier(.22, .75, .24, 1) both; fill: currentColor; transform-box: fill-box; transform-origin: center; }
-.brand-mark-dot-one { animation-delay: 40ms; }
-.brand-mark-dot-two { animation-delay: 120ms; }
-.brand-mark-dot-three { animation-delay: 200ms; }
-.brand-mark-dot-four { animation-delay: 280ms; }
-.brand-mark-dot-five { animation-delay: 360ms; }
 
-@keyframes brand-dot-form {
-  from { opacity: 0; transform: scale(.2); }
+@keyframes brand-line-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes brand-dot-appear {
+  from { opacity: 0; transform: scale(.5); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .brand-mark-line { stroke-dasharray: 1; animation: brand-line-draw 600ms linear 100ms backwards; }
+  .brand-mark-dot { transform-box: fill-box; transform-origin: center; animation: brand-dot-appear 120ms ease-out both; }
+  .brand-mark-dot:nth-child(2) { animation-delay: 300ms; }
+  .brand-mark-dot:nth-child(3) { animation-delay: 490ms; }
+  .brand-mark-dot:nth-child(4) { animation-delay: 700ms; }
 }
 
 .nav-links { align-items: center; color: var(--site-muted); display: flex; font-size: 12px; font-weight: 400; gap: 28px; }
@@ -125,13 +132,13 @@ button, select { font: inherit; }
 .text-button { background: transparent; border: 0; color: inherit; cursor: pointer; font: inherit; padding: 4px 0; }
 .text-button:hover { color: var(--site-text); }
 .footer-editorial { margin-top: 84px; overflow: hidden; }
-.footer-editorial-inner { container-type: inline-size; padding-bottom: 24px; padding-top: 38px; }
+.footer-editorial-inner { container-type: inline-size; margin-inline: auto; width: 92%; padding-bottom: 24px; padding-top: 38px; }
 .footer-wordmark { align-items: baseline; display: flex; gap: .16em; justify-content: center; margin-inline: auto; max-width: 100%; padding: 8px 0 16px; position: relative; white-space: nowrap; width: max-content; }
-.footer-wordmark-word { display: block; font-size: clamp(68px, 11.65vw, min(186px, 13.5cqw)); font-weight: 650; letter-spacing: -.085em; line-height: .8; }
+.footer-wordmark-word { display: block; font-size: 13.5cqw; font-weight: 650; letter-spacing: -.085em; line-height: .8; }
 .footer-editorial-meta { align-items: end; border-top: 1px solid var(--site-line); display: grid; gap: 30px; grid-template-columns: 1fr 1fr; padding-top: 26px; }
-.footer-editorial-meta p { color: var(--site-caption); font-size: 12px; letter-spacing: .035em; margin: 0; text-transform: uppercase; }
+.footer-editorial-meta p { color: var(--site-caption); font-size: 10px; letter-spacing: .035em; margin: 0; text-transform: uppercase; }
 .footer-editorial-meta nav { align-items: center; display: flex; gap: 26px; justify-self: end; }
-.footer-editorial-meta a { color: var(--site-text); font-size: 12px; position: relative; }
+.footer-editorial-meta a { color: var(--site-text); font-size: 10px; position: relative; }
 .footer-editorial-meta a::after { background: currentColor; bottom: -4px; content: ""; height: 1px; left: 0; position: absolute; right: 0; transform: scaleX(0); transform-origin: right; transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
 .footer-editorial-meta a:hover::after { transform: scaleX(1); transform-origin: left; }
 .loading-shell { align-items: center; display: flex; justify-content: center; min-height: 100vh; }
@@ -214,20 +221,18 @@ button, select { font: inherit; }
   .catalog-page .variation-grid { animation: catalog-chart-enter 640ms ease-out 180ms backwards; }
   .catalog-page :is(.install-pill, .gallery-toolbar, .variation-grid):focus-within { animation: none; }
 }
-.catalog-page .brand-mark-dot { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .brand-mark-dot { animation: none; }
 }
 
 @media (max-width: 700px) {
-  .site-nav.shell, .footer-editorial-inner.shell { width: min(100% - 24px, 1160px); }
+  .site-nav.shell, .footer-editorial-meta.shell { width: min(100% - 24px, 1160px); }
   .site-nav { grid-template-columns: 1fr auto; }
   .nav-links { display: none; }
   .nav-docs-mobile { display: block; }
   .footer-editorial { margin-top: 80px; }
-  .footer-editorial-inner { padding-top: 25px; }
+  .footer-editorial-inner { padding-top: 25px; width: 100%; }
   .footer-wordmark { align-items: center; flex-direction: column; gap: 0; padding-bottom: 22px; width: 100%; }
   .footer-wordmark-word { font-size: clamp(70px, 19vw, 132px); line-height: .78; width: max-content; }
   .footer-editorial-meta { align-items: center; grid-template-columns: 1fr auto; }

@@ -29,6 +29,8 @@ import {
 } from "generative-charts";
 import { INSTALL_COMMAND, PACKAGE_NAME } from "../lib/package";
 
+const SPONSORS_URL = "https://github.com/sponsors/kasturikhanke";
+
 type Family = "bar" | "line" | "area" | "scatter" | "pie" | "radar" | "radial" | "heatmap" | "cohort" | "funnel" | "sankey" | "treemap" | "waterfall" | "combo" | "histogram" | "boxplot" | "choropleth" | "terrain";
 type Variation = { id: string; name: string; use: string };
 type CatalogItem = { id: Family; name: string };
@@ -265,7 +267,7 @@ export function Gallery() {
   return <main className="catalog-page" data-chart-theme={theme} id="top">
     <nav className="site-nav shell">
       <Brand />
-      <div className="nav-links"><a href="#charts">Charts</a><Link href="/docs">Docs</Link></div>
+      <div className="nav-links"><a href="#charts">Charts</a><Link href="/docs">Docs</Link><a href={SPONSORS_URL}>Sponsor ↗</a></div>
       <div className="nav-actions"><button aria-label={`Switch to ${appearance === "light" ? "dark" : "light"} mode`} className="theme-toggle" onClick={() => { setAppearance(appearance === "light" ? "dark" : "light"); setThemeReplay((value) => value + 1); }} type="button"><ThemeIcon appearance={appearance} /></button><Link className="nav-install nav-docs-mobile" href="/docs">Docs <span>↗</span></Link></div>
     </nav>
 
@@ -301,11 +303,11 @@ export function Gallery() {
     </section>
 
     <footer className="footer-editorial">
-      <div className="footer-editorial-inner shell">
+      <div className="footer-editorial-inner">
         <div aria-label="Generative Charts" className="footer-wordmark"><span className="footer-wordmark-word">Generative</span><span className="footer-wordmark-word">Charts</span></div>
-        <div className="footer-editorial-meta">
+        <div className="footer-editorial-meta shell">
           <p>Created by Kasturi Khanke</p>
-          <nav aria-label="Footer links"><Link href="/docs">Docs →</Link><a href="#top">Back to top ↑</a></nav>
+          <nav aria-label="Footer links"><a href={SPONSORS_URL}>Sponsor ↗</a><Link href="/docs">Docs →</Link><a href="#top">Back to top ↑</a></nav>
         </div>
       </div>
     </footer>

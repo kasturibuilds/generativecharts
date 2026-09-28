@@ -47,6 +47,8 @@
 .ck-chart[data-theme^="mono-editorial"] .ck-legend { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; letter-spacing: .1em; text-transform: uppercase; }
 .ck-chart[data-theme^="mono-editorial"] .ck-area-material { opacity: 1; }
 .ck-chart[data-theme^="mono-editorial"] .ck-point-halo { display: none; }
+.ck-chart[data-theme^="mono-editorial"]:is(.ck-line, .ck-area) .ck-legend .ck-swatch { background: var(--ck-point-fill) !important; border: 2px solid var(--ck-text); border-radius: 50%; box-shadow: none; flex: 0 0 auto; }
+.ck-chart[data-theme^="mono-editorial"]:is(.ck-line, .ck-area) .ck-legend > :nth-child(n + 2) { border-style: dashed; }
 .ck-chart[data-theme^="mono-editorial"] .ck-radar-secondary { stroke-dasharray: 8 6; stroke-width: 1.75; }
 .ck-chart[data-theme^="mono-editorial"] .ck-radar-secondary-point { stroke-width: 1.5; }
 .ck-chart[data-theme^="mono-editorial"].ck-radar .ck-legend > :nth-child(2) .ck-swatch { background: var(--ck-background) !important; border: 1px dashed var(--ck-text); border-radius: 0; }
@@ -62,6 +64,9 @@
 .ck-chart[data-theme^="mono-editorial"] .ck-zero-grid { stroke-width: 1; }
 .ck-chart[data-theme^="mono-editorial"] .ck-mono-bar-primary { stroke: var(--ck-text); stroke-width: 1.5; }
 .ck-chart[data-theme^="mono-editorial"] .ck-mono-bar-secondary { stroke: var(--ck-axis); stroke-dasharray: 5 3; stroke-width: 1.25; }
+.ck-chart[data-theme^="mono-editorial"].ck-bar .ck-legend .ck-swatch { background: transparent !important; border: 1.5px solid var(--ck-text); border-radius: 0; box-shadow: none; flex: 0 0 auto; height: 10px; width: 18px; }
+.ck-chart[data-theme^="mono-editorial"].ck-bar .ck-legend > :nth-child(even) { border-style: dashed; }
+.ck-chart[data-theme^="mono-editorial"].ck-bar .ck-legend > :nth-child(even) .ck-swatch { border-color: var(--ck-axis); border-width: 1.25px; }
 .ck-chart[data-theme^="mono-editorial"].ck-animate .ck-mark { animation-name: ck-mono-enter; }
 .ck-chart[data-theme^="mono-editorial"][data-family="pie"] .ck-plot { margin-bottom: 4px; }
 .ck-mono-type-legend rect { shape-rendering: crispEdges; stroke-width: 1.25; }
@@ -167,7 +172,9 @@
 .ck-radial-center-kicker { fill: var(--ck-text-muted); font-size: 12px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
 .ck-flow-label, .ck-tile-label { fill: var(--ck-text); font-size: 12px; font-weight: 700; }
 .ck-flow-value, .ck-tile-value { fill: var(--ck-text-muted); font-size: 12px; font-weight: 650; }
+.ck-tile-label, .ck-tile-value { fill: var(--ck-tile-text, var(--ck-text)); }
 .ck-funnel-stage, .ck-treemap-tile, .ck-waterfall-bar, .ck-combo-bar, .ck-histogram-bar, .ck-box, .ck-map-region { filter: drop-shadow(var(--ck-mark-shadow)); }
+.ck-treemap-tile:hover, .ck-treemap-tile:focus-visible { filter: drop-shadow(var(--ck-mark-shadow)); }
 .ck-sankey-link { cursor: pointer; filter: drop-shadow(var(--ck-mark-shadow)); }
 .ck-sankey-link-underlay { pointer-events: none; stroke: var(--ck-background); }
 .ck-sankey-node { fill: var(--ck-text); stroke: var(--ck-background); stroke-width: 2; }

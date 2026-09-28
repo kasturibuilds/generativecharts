@@ -3,6 +3,8 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { AreaChart, BarChart, BoxPlotChart, chartLayoutMode, ChoroplethChart, CohortChart, ComboChart, createTheme, FunnelChart, HeatmapChart, HistogramChart, LineChart, PieChart, RadarChart, RadialChart, SankeyChart, ScatterChart, TerrainChart, TreemapChart, WaterfallChart } from "../src/index";
 
+import { resolveTheme } from "../src/themes";
+
 const rows = [{ label: "A", one: 12, two: 8, x: 1 }, { label: "B", one: 20, two: 14, x: 2 }, { label: "C", one: 16, two: 18, x: 3 }];
 const series = [{ dataKey: "one", label: "One" }, { dataKey: "two", label: "Two" }] as const;
 
@@ -125,6 +127,33 @@ describe("Generative Charts", () => {
     expect(container.querySelectorAll(".ck-sankey-link-underlay")).toHaveLength(3);
     expect(container.querySelectorAll(".ck-sankey-label")).toHaveLength(4);
     expect(container.querySelectorAll(".ck-sankey-node-value")).toHaveLength(4);
+  });
+
+  it("keeps treemap names and values readable across every built-in palette", () => {
+    const luminance = (hex: string) => {
+      const rgb = hex.slice(1).match(/../g)!.map((channel) => {
+        const value = parseInt(channel, 16) / 255;
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+      });
+      return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+    };
+    for (const theme of ["mono-editorial", "neon-instruments", "airform"] as const) {
+      for (const appearance of ["light", "dark"] as const) {
+        const tokens = resolveTheme(theme, appearance).tokens;
+        const data = tokens.palette.map((_, index) => ({ name: `Tile ${index}`, value: 10 }));
+        const { container, unmount } = render(<TreemapChart animate={false} appearance={appearance} data={data} nameKey="name" theme={theme} valueKey="value" />);
+        for (const cell of container.querySelectorAll<SVGGElement>(".ck-treemap-cell")) {
+          expect(cell.querySelector(".ck-tile-label")).not.toBeNull();
+          expect(cell.querySelector(".ck-tile-value")).not.toBeNull();
+          const fill = cell.querySelector("rect")!.getAttribute("fill")!;
+          const background = fill === "transparent" ? tokens.background : fill;
+          const foreground = cell.style.getPropertyValue("--ck-tile-text");
+          const a = luminance(background), b = luminance(foreground);
+          expect((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)).toBeGreaterThanOrEqual(4.5);
+        }
+        unmount();
+      }
+    }
   });
 
   it("renders equal-weight treemap peers without recursive partition failure", () => {
