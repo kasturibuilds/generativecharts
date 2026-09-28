@@ -38,3 +38,15 @@ documentation layouts. Existing composition, outline bars, and theme treatments
 are preserved. Four desktop Mono Editorial pie baselines were reviewed side by
 side and refreshed for minor edge rasterization differences; the other 218
 snapshots were unchanged. The visual tolerance remains unchanged.
+
+## Branding and treemap readability review (2026-09-28)
+
+Reviewed the complete gallery page at 390px and 1280px with the connected-dot
+brand mark and revised footer. Chart wrappers remain transparent, controls stay
+discoverable, and Mono Editorial bars remain unfilled outlines. No drawer is
+present. Reviewed bar, line, area, and treemap treatments across all three themes
+and both modes, plus all twelve desktop/mobile treemap captures. Treemap names
+and values now share a foreground selected for contrast against their tile; Mono
+Editorial uses its normal text color. Only these twelve treemap baselines were
+refreshed after review. The other 290 browser and visual checks passed unchanged;
+screenshot tolerance remains 100 pixels.
