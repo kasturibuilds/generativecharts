@@ -180,6 +180,8 @@
 .ck-sankey-node { fill: var(--ck-text); stroke: var(--ck-background); stroke-width: 2; }
 .ck-sankey-label { fill: var(--ck-text); font-family: var(--ck-font); font-size: 12px; font-weight: 800; letter-spacing: .08em; paint-order: stroke; stroke: var(--ck-background); stroke-linejoin: round; stroke-width: 4px; }
 .ck-sankey-node-value { fill: var(--ck-text-muted); font-family: var(--ck-font); font-size: 12px; font-weight: 700; letter-spacing: .06em; paint-order: stroke; stroke: var(--ck-background); stroke-linejoin: round; stroke-width: 3px; }
+/* SVG drop shadows can expose rectangular filter bounds around these bars. */
+.ck-chart[data-theme^="airform"] .ck-waterfall-bar { filter: none; }
 .ck-waterfall-connector { stroke: var(--ck-axis); stroke-dasharray: 4 3; }
 .ck-combo-line { filter: drop-shadow(var(--ck-mark-shadow)); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
 .ck-box-whisker { stroke: var(--ck-axis); stroke-width: 1.5; }
