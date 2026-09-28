@@ -2,6 +2,8 @@
 
 Polished, accessible React charts with eighteen useful chart families, three themes, and universal light and dark modes.
 
+[Gallery](https://generativecharts.com) · [Documentation](https://generativecharts.com/docs) · [GitHub](https://github.com/kasturikhanke/generativecharts) · [Sponsor](https://github.com/sponsors/kasturikhanke)
+
 ## Install
 
 ```bash
@@ -62,7 +64,7 @@ Bar charts accept signed values in grouped and stacked layouts. Positive and neg
 
 ## Missing values and diagnostics
 
-ChartKit never turns a missing measurement into zero unless you explicitly ask it to. Bars omit missing marks, line and area charts break their paths, radar charts leave incomplete profiles open, and matrix charts render a distinct missing cell.
+Generative Charts never turns a missing measurement into zero unless you explicitly ask it to. Bars omit missing marks, line and area charts break their paths, radar charts leave incomplete profiles open, and matrix charts render a distinct missing cell.
 
 Use `missingValueStrategy="connect"` to bridge line/area gaps or `missingValueStrategy="zero"` to make zero imputation explicit. Development builds warn about missing, malformed, and non-finite numeric values. Use `onDiagnostic` when you also need structured observability:
 
@@ -116,7 +118,7 @@ Every chart measures its plot container. Compact, standard, and wide layout mode
 From the workspace root:
 
 ```bash
-npm install
+npm ci
 npm run dev
 npm test
 ```

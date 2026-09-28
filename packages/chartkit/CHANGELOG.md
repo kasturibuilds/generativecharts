@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
+
+Public launch release.
+
+### Migration from 0.1.0
+
+Missing measurements are no longer treated as zero by default. Use `missingValueStrategy="zero"` to preserve explicit zero imputation. Numeric x-values now infer a linear axis; use `xScale={{ type: "categorical" }}` when those numbers are category labels.
+
+### Changes
 
 - Added explicit missing-value strategies and structured development diagnostics; renderers no longer silently invent zero measurements by default.
 - Added categorical, linear, and temporal Cartesian x-scales with explicit domains, deterministic UTC formatting, and responsive tick counts.

@@ -2,7 +2,7 @@
 
 Accessible React charts with eighteen chart families, three themes, and light and dark modes.
 
-[Gallery](https://generativecharts.com) · [Documentation](https://generativecharts.com/docs) · [npm](https://www.npmjs.com/package/generative-charts)
+[Gallery](https://generativecharts.com) · [Documentation](https://generativecharts.com/docs) · [npm](https://www.npmjs.com/package/generative-charts) · [Sponsor](https://github.com/sponsors/kasturikhanke)
 
 ## Use the library
 
