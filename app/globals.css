@@ -65,6 +65,13 @@ button, select { font: inherit; }
 
 .nav-links { align-items: center; color: var(--site-muted); display: flex; font-size: 12px; font-weight: 400; gap: 28px; }
 .nav-actions { align-items: center; display: flex; gap: 7px; justify-self: end; }
+.github-button { align-items: center; background: var(--site-panel); border: 1px solid var(--site-line); border-radius: 8px; color: var(--site-text); display: inline-flex; gap: 8px; min-height: 36px; padding: 0 11px; }
+.github-button:hover { background: var(--site-soft); }
+.github-button:focus-visible { outline: 2px solid var(--site-text); outline-offset: 2px; }
+.github-button svg { fill: currentColor; height: 15px; width: 15px; }
+.github-button > span { font-size: 10px; font-weight: 650; }
+.github-button-compact { min-height: 31px; padding-inline: 9px; }
+.github-button-compact > span { font-size: 9px; }
 .nav-docs-mobile { display: none; }
 .nav-install { background: var(--site-panel); border: 1px solid var(--site-line); border-radius: 7px; font-size: 12px; font-weight: 550; padding: 8px 11px; }
 .nav-install span { margin-left: 8px; }
@@ -243,6 +250,9 @@ button, select { font: inherit; }
   .brand-mark { height: 23px; width: 23px; }
   .nav-actions { gap: 6px; }
   .theme-toggle { height: 36px; width: 36px; }
+  .github-button-compact { justify-content: center; min-height: 36px; min-width: 36px; padding: 0; width: 36px; }
+  .github-button-compact svg { height: 16px; width: 16px; }
+  .github-button-compact > span { display: none; }
   .nav-install { align-items: center; display: flex; height: 36px; padding: 0 10px; white-space: nowrap; }
   .catalog-hero { align-items: stretch; padding: 40px 17px 36px; text-align: left; }
   .catalog-hero h1 { font-size: 32px; line-height: 1.15; }

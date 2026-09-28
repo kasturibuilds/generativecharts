@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore, type MouseEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
+import { GitHubButton } from "./github-button";
 import { Brand } from "./brand";
 import { ThemeIcon } from "./theme-icon";
 import {
@@ -268,7 +269,7 @@ export function Gallery() {
     <nav className="site-nav shell">
       <Brand />
       <div className="nav-links"><a href="#charts">Charts</a><Link href="/docs">Docs</Link><a href={SPONSORS_URL}>Sponsor ↗</a></div>
-      <div className="nav-actions"><button aria-label={`Switch to ${appearance === "light" ? "dark" : "light"} mode`} className="theme-toggle" onClick={() => { setAppearance(appearance === "light" ? "dark" : "light"); setThemeReplay((value) => value + 1); }} type="button"><ThemeIcon appearance={appearance} /></button><Link className="nav-install nav-docs-mobile" href="/docs">Docs <span>↗</span></Link></div>
+      <div className="nav-actions"><GitHubButton compact /><button aria-label={`Switch to ${appearance === "light" ? "dark" : "light"} mode`} className="theme-toggle" onClick={() => { setAppearance(appearance === "light" ? "dark" : "light"); setThemeReplay((value) => value + 1); }} type="button"><ThemeIcon appearance={appearance} /></button><Link className="nav-install nav-docs-mobile" href="/docs">Docs <span>↗</span></Link></div>
     </nav>
 
     <header className="catalog-hero shell">
